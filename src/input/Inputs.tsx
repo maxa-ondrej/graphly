@@ -1,5 +1,5 @@
 import {useDispatch, useSelector} from "react-redux";
-import store from "../../store";
+import store from "../store";
 import React, {useCallback, useEffect} from "react";
 import Input from "./Input";
 import {Button} from "react-bootstrap";

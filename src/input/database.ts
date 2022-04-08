@@ -1,5 +1,5 @@
 import {createSlice, Draft, PayloadAction, SliceCaseReducers} from '@reduxjs/toolkit'
-import {StateType} from "../../store";
+import {StateType} from "../store";
 import {FunctionPlotDatum} from "function-plot/dist/types";
 
 export interface InputStateType {

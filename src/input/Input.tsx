@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
-import {modify as modifyPlot, RecipeWithId, remove as removePlot} from "../../math/plot/database";
+import {modify as modifyPlot, RecipeWithId, remove as removePlot} from "../math/plot/database";
 import {Button, Col, Container, Form, Row} from "react-bootstrap";
 import LinearInput from "./LinearInput";
 import {deselect, isSelected, remove as removeInput, selectDatum} from "./database";

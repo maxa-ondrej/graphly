@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import Plot from "./math/plot/Plot";
-import Inputs from "./components/input/Inputs";
+import Inputs from "./input/Inputs";
 import {Col, Row} from "react-bootstrap";
 
 function getWindowDimensions() {

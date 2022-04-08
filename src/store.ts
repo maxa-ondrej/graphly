@@ -1,5 +1,5 @@
 import plot, {PlotStateType} from "./math/plot/database";
-import inputs, {InputStateType} from "./components/input/database";
+import inputs, {InputStateType} from "./input/database";
 import {configureStore} from "@reduxjs/toolkit";
 
 /**
