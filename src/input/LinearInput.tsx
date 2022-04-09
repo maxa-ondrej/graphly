@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Button, Col, Form, Row} from "react-bootstrap";
+import {Button, Col, Form, InputGroup, Row} from "react-bootstrap";
 import {useDispatch, useSelector} from "react-redux";
 import {modify, selectDatum} from "./database";
 import parseIt from "../math/eval/parser";
@@ -58,13 +58,16 @@ export default function LinearInput({ id, errorHandler }: {id: number, errorHand
     return (
         <div>
             <Row>
-                <Col>
-                    <Form.Control
-                        type="text"
-                        value={value}
-                        onChange={event => setValue(event.target.value)}
-                        placeholder="Předpis funkce"
-                    />
+                <Col xs={12}>
+                    <InputGroup className="mb-3">
+                        <InputGroup.Text id="basic-addon1">f(x) = </InputGroup.Text>
+                        <Form.Control
+                            type="text"
+                            value={value}
+                            onChange={event => setValue(event.target.value)}
+                            placeholder="Předpis funkce"
+                        />
+                    </InputGroup>
                 </Col>
             </Row>
             <Row className={firstDerivations === undefined ? 'd-none' : 'mt-2'}>
