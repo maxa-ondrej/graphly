@@ -1,6 +1,9 @@
 import {Binary} from "./binary";
 import {Function} from "./function";
 import {Constant} from "./constant";
+import {simplify as mathSimplify} from "mathjs";
+import parseIt from "../eval/parser";
+import lexIt from "../eval/lexer";
 
 export const INDENT = '  ';
 
@@ -15,8 +18,6 @@ export interface Node {
     toTex(): string;
 
     derive(variable: string): Node;
-
-    simplify(): Node;
 
     hasVariable(variable: string): boolean;
 
@@ -43,9 +44,6 @@ export const Number = (value: number): Node => ({
     },
     derive(): Node {
         return Zero;
-    },
-    simplify(): Node {
-        return this;
     }
 });
 
@@ -66,41 +64,19 @@ export const Variable = (name: string): Node => ({
     },
     derive(): Node {
         return One;
-    },
-    simplify(): Node {
-        return this;
     }
 });
 
-export const Expression = (node: Node): Node => ({
-    type: 'expression',
-    hasVariable: () => true,
-    compute(variables: Variables = new Map<string, number>()): number {
-        return node.compute(variables);
-    },
-    format(): string {
-        return node.format();
-    },
-    toTex(): string {
-        return node.toTex();
-    },
-    tree(): string {
-        return node.tree('');
-    },
-    derive(variable: string): Node {
-        return deriveIfDerivable(node, variable);
-    },
-    simplify(): Node {
-        return node.simplify();
-    }
-});
+export const simplify = (node: Node) => parseIt(lexIt(mathSimplify(node.format(), {}, {exactFractions: true}).toString()));
 
-export const deriveIfDerivable = (node: Node, variable: string) => {
+export const derive = (node: Node, variable: string) => {
     if (node.hasVariable(variable)) {
         return node.derive(variable);
     }
     return Zero;
 }
+
+export const deriveAndSimplify = (node: Node, variable: string) => simplify(derive(node, variable));
 
 export const nodesEqual = (a: Node, b: Node) => {
     if (a.type !== b.type) {
@@ -123,152 +99,91 @@ export const Negate = (node: Node) => {
 export const Fraction = (d: number, n: number): Node => Divide(Number(d), Number(n));
 
 export const Plus = Binary('+', 'PLUS', (a, b) => a + b, (a, b, variable) => {
-    let derA = deriveIfDerivable(a, variable);
-    if (!b.hasVariable) {
+    let derA = derive(a, variable);
+    if (!b.hasVariable(variable)) {
         return derA;
     }
-    let derB = deriveIfDerivable(b, variable);
-    if (!a.hasVariable) {
+    let derB = derive(b, variable);
+    if (!a.hasVariable(variable)) {
         return derB;
     }
     return Plus(derA, derB);
-}, (a, b) => {
-    let simA = a.simplify();
-    let simB = b.simplify();
-    if (nodesEqual(simA, Zero)) {
-        return simB;
-    }
-    if (nodesEqual(simB, Zero)) {
-        return simA;
-    }
-    return Plus(simA, simB);
 }, (left, right) => `\\left(${left} + ${right}\\right)`);
 
 export const Minus = Binary('-', 'MINUS', (a, b) => a - b, (a, b, variable) => {
-    let derA = deriveIfDerivable(a, variable);
-    if (!b.hasVariable) {
+    let derA = derive(a, variable);
+    if (!b.hasVariable(variable)) {
         return derA;
     }
-    let derB = deriveIfDerivable(b, variable);
-    if (!a.hasVariable) {
+    let derB = derive(b, variable);
+    if (!a.hasVariable(variable)) {
         return Negate(derB);
     }
     return Minus(derA, derB);
-}, (a, b) => {
-    let simA = a.simplify();
-    let simB = b.simplify();
-    if (nodesEqual(simA, Zero)) {
-        return Negate(simB).simplify();
-    }
-    if (nodesEqual(simB, Zero)) {
-        return simA;
-    }
-    if (nodesEqual(simA, simB)) {
-        return Zero;
-    }
-    return Minus(simA, simB);
 }, (left, right) => `\\left(${left} - ${right}\\right)`);
 export const Times = Binary('*', 'TIMES', (a, b) => a * b, (a, b, variable) => {
-    let derA = deriveIfDerivable(a, variable);
-    if (!b.hasVariable) {
+    let derA = derive(a, variable);
+    if (!b.hasVariable(variable)) {
         return Times(b, derA);
     }
-    let derB = deriveIfDerivable(b, variable);
-    if (!a.hasVariable) {
+    let derB = derive(b, variable);
+    if (!a.hasVariable(variable)) {
         return Times(a, derB);
     }
     return Plus(Times(derA, b), Times(a, derB));
-}, (a, b) => {
-    let simA = a.simplify();
-    let simB = b.simplify();
-    if (nodesEqual(simA, Zero) || nodesEqual(simB, Zero)) {
-        return Zero;
-    }
-    if (nodesEqual(simA, One)) {
-        return simB;
-    }
-    if (nodesEqual(simA, NegativeOne)) {
-        return Negate(simB);
-    }
-    if (nodesEqual(simB, One)) {
-        return simA;
-    }
-    if (nodesEqual(simB, NegativeOne)) {
-        return Negate(simA);
-    }
-    return Times(simA, simB);
 }, (left, right) => `{${left}} \\cdot {${right}}`);
 export const Divide = Binary('/', 'OBELUS', (a, b) => a / b, (a, b, variable) => {
-    let derA = deriveIfDerivable(a, variable);
-    if (!b.hasVariable) {
+    let derA = derive(a, variable);
+    if (!b.hasVariable(variable)) {
         return Divide(derA, b);
     }
-    if (!a.hasVariable) {
+    if (!a.hasVariable(variable)) {
         return Times(a, Power(b, NegativeOne).derive(variable));
     }
     return Divide(
-        Minus(Times(derA, b), Times(a, deriveIfDerivable(b, variable))),
+        Minus(Times(derA, b), Times(a, derive(b, variable))),
         Power(b, Number(2))
     );
-}, (a, b) => {
-    let simB = b.simplify();
-    if (nodesEqual(simB, Zero)) {
-        return Divide(One, Zero);
-    }
-    let simA = a.simplify();
-    if (nodesEqual(simA, Zero)) {
-        return Zero;
-    }
-    return Divide(simA, simB);
 }, (left, right) => `\\frac{${left}}{${right}}`);
 export const Power = Binary('^', 'POWER', (a, b) => a ** b, (a, b, variable) => {
     if (nodesEqual(b, One)) {
-        return deriveIfDerivable(a, variable);
+        return derive(a, variable);
     }
 
-    let derA = deriveIfDerivable(a, variable);
-    if (!b.hasVariable) {
-        return Times(Times(b, Power(a, Minus(b, One))), derA);
+    if (!b.hasVariable(variable)) {
+        return Times(Times(b, Power(a, Minus(b, One))), derive(a, variable));
     }
 
-    let derB = deriveIfDerivable(b, variable);
-    if (!a.hasVariable) {
+    let derB = derive(b, variable);
+    if (!a.hasVariable(variable)) {
         if (nodesEqual(a, Euler)) {
             return Times(Power(Euler, b), derB);
         }
         return Times(Times(Power(a, b), Ln(a)), derB);
     }
     return Power(Euler, Times(b, Ln(a))).derive(variable);
-}, (a, b) => {
-    let simA = a.simplify();
-    if (nodesEqual(simA, Zero)) {
-        return Zero;
-    }
-    let simB = b.simplify();
-    if (nodesEqual(simB, Zero)) {
-        return One;
-    }
-    return Power(simA, simB);
 }, (left, right) => `\\left(${left}\\right)^{${right}}`);
 
 export const Euler = Constant('exp(1)', 'e', Math.E);
 export const Pi = Constant('PI', '\\pi', Math.PI);
 
-export const Ln = Function('LN', argument => `log(${argument}) / log(exp(1))`, Math.log, (argument, variable) => Divide(deriveIfDerivable(argument, variable), argument), argument => `\\ln{\\left(${argument}\\right)}`);
-export const Log = Function('LOG', argument => `log(${argument})`, Math.log10, (argument, variable) => Divide(deriveIfDerivable(argument, variable), Times(argument, Ln(Number(10)))), argument => `\\log{\\left(${argument}\\right)}`);
+export const Sqrt = Function('SQRT', argument => `sqrt(${argument})`, Math.sqrt, (argument) => Times(Fraction(-1, 2), Power(argument, Minus(Fraction(-1, 2), One))), argument => `\\sqrt{\\left(${argument}\\right)}`);
 
-export const Sin = Function('SIN', argument => `sin(${argument})`, Math.sin, (argument, variable) => Times(deriveIfDerivable(argument, variable), CoSin(argument)), argument => `\\sin{\\left(${argument}\\right)}`);
-export const Sinh = Function('SINH', argument => `sinh(${argument})`, Math.sinh, (argument, variable) => Times(deriveIfDerivable(argument, variable), CoSinh(argument)), argument => `\\sinh{\\left(${argument}\\right)}`);
-export const ArcSin = Function('ARCSIN', argument => `asin(${argument})`, Math.asin, (argument, variable) => Divide(deriveIfDerivable(argument, variable), Power(Minus(One, Power(argument, Number(2))), Fraction(1, 2))), argument => `\\arcsin{\\left(${argument}\\right)}`);
+export const Ln = Function('LN', argument => `log(${argument}) / log(exp(1))`, Math.log, (argument) => Divide(One, argument), argument => `\\ln{\\left(${argument}\\right)}`);
+export const Log = Function('LOG', argument => `log(${argument})`, Math.log10, (argument) => Divide(One, Times(argument, Ln(Number(10)))), argument => `\\log{\\left(${argument}\\right)}`);
 
-export const CoSin = Function('COS', argument => `cos(${argument})`, Math.cos, (argument, variable) => Negate(Times(deriveIfDerivable(argument, variable), Sin(argument))), argument => `\\cos{\\left(${argument}\\right)}`);
-export const CoSinh = Function('COSH', argument => `cosh(${argument})`, Math.cosh, (argument, variable) => Times(deriveIfDerivable(argument, variable), Sinh(argument)), argument => `\\cosh{\\left(${argument}\\right)}`);
-export const ArcCoSin = Function('ARCCOS', argument => `acos(${argument})`, Math.acos, (argument, variable) => Divide(Negate(deriveIfDerivable(argument, variable)), Power(Minus(One, Power(argument, Number(2))), Fraction(1, 2))), argument => `\\arccos{\\left(${argument}\\right)}`);
+export const Sin = Function('SIN', argument => `sin(${argument})`, Math.sin, (argument) => CoSin(argument), argument => `\\sin{\\left(${argument}\\right)}`);
+export const Sinh = Function('SINH', argument => `sinh(${argument})`, Math.sinh, (argument) => CoSinh(argument), argument => `\\sinh{\\left(${argument}\\right)}`);
+export const ArcSin = Function('ARCSIN', argument => `asin(${argument})`, Math.asin, (argument) => Power(Minus(One, Power(argument, Number(2))), Fraction(-1, 2)), argument => `\\arcsin{\\left(${argument}\\right)}`);
 
-export const Tan = Function('TAN', argument => `tan(${argument})`, Math.tan, (argument, variable) => Divide(deriveIfDerivable(argument, variable), Power(CoSin(argument), Number(2))), argument => `\\tan{\\left(${argument}\\right)}`);
-export const Tanh = Function('TANH', argument => `tanh(${argument})`, Math.tanh, (argument, variable) => Times(deriveIfDerivable(argument, variable), Minus(One, Power(Tanh(argument), Number(2)))), argument => `\\tanh{\\left(${argument}\\right)}`);
-export const ArcTan = Function('ARCTAN', argument => `atan(${argument})`, Math.atan, (argument, variable) => Divide(deriveIfDerivable(argument, variable), Plus(One, Power(argument, Number(2)))), argument => `\\arctan{\\left(${argument}\\right)}`);
+export const CoSin = Function('COS', argument => `cos(${argument})`, Math.cos, (argument) => Negate(Sin(argument)), argument => `\\cos{\\left(${argument}\\right)}`);
+export const CoSinh = Function('COSH', argument => `cosh(${argument})`, Math.cosh, (argument) => Sinh(argument), argument => `\\cosh{\\left(${argument}\\right)}`);
+export const ArcCoSin = Function('ARCCOS', argument => `acos(${argument})`, Math.acos, (argument) => Negate(Power(Minus(One, Power(argument, Number(2))), Fraction(-1, 2))), argument => `\\arccos{\\left(${argument}\\right)}`);
 
-export const CoTan = Function('COTAN', argument => `1 / tan(${argument})`, argument => 1 / Math.tan(argument), (argument, variable) => Divide(Negate(deriveIfDerivable(argument, variable)), Power(Sin(argument), Number(2))), argument => `\\cot{\\left(${argument}\\right)}`);
-export const CoTanh = Function('COTANH', argument => `(exp(2 * (${argument})) + 1)/(exp(2 * (${argument})) - 1)`, argument => (Math.E ** (2 * argument) + 1) / (Math.E ** (2 * argument) - 1), (argument, variable) => Times(deriveIfDerivable(argument, variable), Minus(One, Power(CoTanh(argument), Number(2)))), argument => `\\coth{\\left(${argument}\\right)}`);
-export const ArcCoTan = Function('ARCCOTAN', argument => `PI / 2 - atan(${argument})`, argument => Math.PI / 2 - Math.atan(argument), (argument, variable) => Divide(Negate(deriveIfDerivable(argument, variable)), Plus(One, Power(argument, Number(2)))), argument => `\\text{arccot}{\\left(${argument}\\right)}`);
+export const Tan = Function('TAN', argument => `tan(${argument})`, Math.tan, (argument) => Power(CoSin(argument), Number(-2)), argument => `\\tan{\\left(${argument}\\right)}`);
+export const Tanh = Function('TANH', argument => `tanh(${argument})`, Math.tanh, (argument) => Minus(One, Power(Tanh(argument), Number(2))), argument => `\\tanh{\\left(${argument}\\right)}`);
+export const ArcTan = Function('ARCTAN', argument => `atan(${argument})`, Math.atan, (argument) => Divide(One, Plus(One, Power(argument, Number(2)))), argument => `\\arctan{\\left(${argument}\\right)}`);
+
+export const CoTan = Function('COTAN', argument => `1 / tan(${argument})`, argument => 1 / Math.tan(argument), (argument) => Negate(Power(Sin(argument), Number(-2))), argument => `\\cot{\\left(${argument}\\right)}`);
+export const CoTanh = Function('COTANH', argument => `(exp(2 * (${argument})) + 1)/(exp(2 * (${argument})) - 1)`, argument => (Math.E ** (2 * argument) + 1) / (Math.E ** (2 * argument) - 1), (argument) => Minus(One, Power(CoTanh(argument), Number(2))), argument => `\\coth{\\left(${argument}\\right)}`);
+export const ArcCoTan = Function('ARCCOTAN', argument => `PI / 2 - atan(${argument})`, argument => Math.PI / 2 - Math.atan(argument), (argument, variable) => Divide(NegativeOne, Plus(One, Power(argument, Number(2)))), argument => `\\text{arccot}{\\left(${argument}\\right)}`);

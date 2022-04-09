@@ -22,7 +22,7 @@ class ParentNode implements Node {
     }
 
     format(): string {
-        return `name`;
+        return this.functionName;
     }
 
     toTex(): string {

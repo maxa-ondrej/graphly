@@ -15,6 +15,7 @@ export interface ParsedData {
 
 export interface Data {
     datum: FunctionPlotDatum,
+    raw: string,
     fancy: string
 }
 

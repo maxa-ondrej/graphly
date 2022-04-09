@@ -2,7 +2,6 @@ import {INDENT, Node, Variables} from "./index";
 
 type Computer = (left: number, right: number) => number;
 type Deriver = (left: Node, right: Node, variable: string) => Node;
-type Simplifier = (left: Node, right: Node) => Node;
 type TexConvertor = (left: string, right: string) => string;
 
 class ParentNode implements Node {
@@ -15,17 +14,15 @@ class ParentNode implements Node {
     readonly name: string;
     readonly computer: Computer;
     readonly deriver: Deriver;
-    readonly simplifier: Simplifier;
     readonly texConvertor: TexConvertor;
 
-    constructor(left: Node, right: Node, operator: string, name: string, computer: Computer, deriver: Deriver, simplifier: Simplifier, texConvertor: TexConvertor) {
+    constructor(left: Node, right: Node, operator: string, name: string, computer: Computer, deriver: Deriver, texConvertor: TexConvertor) {
         this.left = left;
         this.right = right;
         this.operator = operator;
         this.name = name;
         this.computer = computer;
         this.deriver = deriver;
-        this.simplifier = simplifier;
         this.texConvertor = texConvertor;
     }
 
@@ -53,10 +50,6 @@ class ParentNode implements Node {
         return this.deriver(this.left, this.right, variable);
     }
 
-    simplify(): Node {
-        return this.simplifier(this.left, this.right);
-    }
-
 }
 
-export const Binary = (operator: string, name: string, computer: Computer, deriver: Deriver, simplifier: Simplifier, texConvertor: TexConvertor) => (left: Node, right: Node) => new ParentNode(left, right, operator, name, computer, deriver, simplifier, texConvertor);
+export const Binary = (operator: string, name: string, computer: Computer, deriver: Deriver, texConvertor: TexConvertor) => (left: Node, right: Node) => new ParentNode(left, right, operator, name, computer, deriver, texConvertor);

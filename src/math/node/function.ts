@@ -1,4 +1,4 @@
-import {INDENT, Node, Variables} from "./index";
+import {derive, INDENT, Node, Times, Variables} from "./index";
 
 type Formatter = (argument: string) => string;
 type Computer = (argument: number) => number;
@@ -46,11 +46,7 @@ class ParentNode implements Node {
     }
 
     derive(variable: string): Node {
-        return this.deriver(this.argument, variable);
-    }
-
-    simplify(): Node {
-        return this;
+        return Times(this.deriver(this.argument, variable), derive(this.argument, variable));
     }
 
 }

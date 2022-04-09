@@ -1,17 +1,17 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
-import {modify as modifyPlot, RecipeWithId, remove as removePlot} from "../math/plot/database";
-import {Button, Col, Container, Form, Row} from "react-bootstrap";
+import {modify as modifyPlot, remove as removePlot} from "../math/plot/database";
+import {Button, Col, Form, Row} from "react-bootstrap";
 import LinearInput from "./LinearInput";
 import {deselect, isSelected, remove as removeInput, selectDatum} from "./database";
-import TeXToSVG from 'tex-to-svg';
 import ReactSwitch from "react-switch";
-import {FunctionPlotDatum} from "function-plot/dist/types";
+import Popover from "../components/Popover";
+import MathJax from "../components/MathJax";
 
-export function parseInput(type: string, id: number) {
+export function parseInput(type: string, id: number, setError: (message: string) => void) {
     switch (type) {
         case "linear":
-            return <LinearInput id={id} />;
+            return <LinearInput id={id} errorHandler={setError} />;
         case 'parametric':
         case 'implicit':
             return <p>ToBeDone</p>;
@@ -36,12 +36,14 @@ export default function Input({ id }: { id: number }) {
     const [inputType, setInputType] = useState(inputTypes[0].value);
     const [color, setColor] = useState('black');
     const [visible, setVisible] = useState(true);
+    const [error, setError] = useState('');
+    const inputRef = useRef(null);
     const dispatch = useDispatch();
     const data = useSelector(selectDatum(id));
     const selected = useSelector(isSelected(id));
 
 
-    const handleSubmit = () => {
+    const handleSubmit = (hide: boolean) => {
         if (data === null) {
             alert('You need to enter the function details first!');
             return;
@@ -52,14 +54,17 @@ export default function Input({ id }: { id: number }) {
             datum: visible ? {
                 ...data.datum,
                 color,
+                graphType: 'polyline'
             } : null
         }));
-        dispatch(deselect())
+        if (hide) {
+            dispatch(deselect())
+        }
     };
 
     useEffect(() => {
         if (data !== null) {
-            handleSubmit();
+            handleSubmit(false);
         }
     }, [visible, color]);
 
@@ -70,30 +75,33 @@ export default function Input({ id }: { id: number }) {
     }, [dispatch, id]);
 
     if (!selected && data !== null) {
-        return <div className={visible ? 'text-dark' : 'text-muted'} dangerouslySetInnerHTML={{__html: TeXToSVG(data.fancy)}} />;
+        return <div className={visible ? 'text-dark' : 'text-muted'}><MathJax  tex={data.fancy} /></div>;
     }
 
     return (
         <Form onSubmit={event => {
-            handleSubmit();
+            handleSubmit(true);
             event.preventDefault();
         }}>
             <Row className='mt-2 mb-2'>
-                <Col>
-                    {parseInput(inputType, id)}
+                <Col ref={inputRef}>
+                    {parseInput(inputType, id, setError)}
                 </Col>
+                <Popover message={error} placement='bottom' target={inputRef.current} show={error !== ''} />
             </Row>
             <Row className='mb-2'>
-                <Col sx={8}>
+                <Col>
                     <Form.Select className='w-100' value={inputType} onChange={event => setInputType(event.target.value)}>
                         {inputTypes.map(({label, value}) => <option value={value} key={value}>{label}</option>)}
                     </Form.Select>
                 </Col>
+            </Row>
+            <Row className='mb-2'>
                 <Col sx={4}>
                     <Form.Control className='w-100' type="color" value={color} onChange={event => setColor(event.target.value)} />
                 </Col>
                 <Col sx={4}>
-                    <ReactSwitch checked={visible} onChange={checked => setVisible(checked)} />
+                    <ReactSwitch className='w-100' checked={visible} onChange={checked => setVisible(checked)} />
                 </Col>
             </Row>
             <Row className='mb-2'>
