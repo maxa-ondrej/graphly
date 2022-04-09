@@ -39,7 +39,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "docs": "typedoc --entryPointStrategy expand ./src",
-    "docs-watch": "typedoc --entryPointStrategy expand ./src --watch"
+    "docs-watch": "typedoc --entryPointStrategy expand ./src --watch",
+    "tauri": "tauri"
   },
   "eslintConfig": {
     "extends": [
@@ -58,5 +59,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@tauri-apps/api": "^1.0.0-rc.3",
+    "@tauri-apps/cli": "^1.0.0-rc.8"
   }
 }
