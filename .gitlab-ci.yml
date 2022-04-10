@@ -1,8 +1,9 @@
 docs-pages:
   image: node
   script:
-    - yarn
+    - yarn --frozen-lockfile
     - yarn docs
+    - rm -rf public
     - mv docs public
   artifacts:
     paths:
