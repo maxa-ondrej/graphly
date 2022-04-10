@@ -1,4 +1,4 @@
-docs-pages:
+pages:
   image: node
   script:
     - yarn --frozen-lockfile
