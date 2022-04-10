@@ -1,74 +1,11 @@
-stages:
-  - build
-  - package
-  - deploy
-
-build-dependencies:
+docs-pages:
   image: node
-  stage: build
   script:
-    - yarn --frozen-lockfile
-  artifacts:
-    paths:
-    - node_modules/
-    expire_in: 1 week
-  only:
-    - master
-
-build-app:
-  image: node
-  stage: build
-  needs:
-    - job: build-dependencies
-      artifacts: true
-  script:
-    - yarn build
-  artifacts:
-    paths:
-      - build/
-    expire_in: 1 week
-  only:
-    - master
-
-build-docs:
-  image: node
-  stage: build
-  needs:
-    - job: build-dependencies
-      artifacts: true
-  script:
+    - yarn
     - yarn docs
-  artifacts:
-    paths:
-      - docs/
-    expire_in: 1 week
-  only:
-    - master
-
-package-app:
-  image: node
-  stage: package
-  needs:
-    - job: build-app
-      artifacts: true
-  before_script:
-    - curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-  script:
-    - yarn tauri build
-  artifacts:
-    paths:
-      - src-tauri/target/release/bundle
-    expire_in: 1 week
-  only:
-    - master
-
-deploy-docs:
-  stage: deploy
-  needs:
-    - job: build-docs
-      artifacts: true
+    - mv docs public
   artifacts:
     paths:
       - public
-  script:
-    - mv docs public
+  only:
+    - master
