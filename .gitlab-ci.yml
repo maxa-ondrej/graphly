@@ -4,7 +4,7 @@ stages:
   - deploy
 
 build-dependencies:
-  image: node:12.17.0
+  image: node
   stage: build
   script:
     - yarn --frozen-lockfile
@@ -16,7 +16,7 @@ build-dependencies:
     - master
 
 build-app:
-  image: node:12.17.0
+  image: node
   stage: build
   needs:
     - job: build-dependencies
@@ -31,7 +31,7 @@ build-app:
     - master
 
 build-docs:
-  image: node:12.17.0
+  image: node
   stage: build
   needs:
     - job: build-dependencies
@@ -46,7 +46,7 @@ build-docs:
     - master
 
 package-app:
-  image: node:12.17.0
+  image: node
   stage: package
   needs:
     - job: build-app
