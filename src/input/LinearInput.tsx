@@ -53,6 +53,7 @@ export default function LinearInput({ id, errorHandler }: {id: number, errorHand
         }
     }
 
+    // eslint-disable-next-line
     useEffect(updateData, [value]);
 
     return (

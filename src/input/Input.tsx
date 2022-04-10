@@ -66,6 +66,7 @@ export default function Input({ id }: { id: number }) {
         if (data !== null) {
             handleSubmit(false);
         }
+    // eslint-disable-next-line
     }, [visible, color]);
 
 

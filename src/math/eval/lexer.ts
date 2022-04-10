@@ -1,7 +1,6 @@
 import {
     CloseBracket,
     Eof,
-    getBracketCode,
     Minus,
     Number,
     Obelus,
