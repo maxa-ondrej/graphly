@@ -1,4 +1,5 @@
 import {derive, INDENT, Node, Times, Variables} from "./index";
+import {uniqueJoin} from "../../utils/arrays";
 
 type Formatter = (argument: string) => string;
 type Computer = (argument: number) => number;
@@ -29,12 +30,14 @@ class ParentNode implements Node {
         return this.argument.hasVariable(variable);
     }
 
+    getVariables = () => this.argument.getVariables();
+
     compute(variables: Variables): number {
         return this.computer(this.argument.compute(variables));
     }
 
-    format(): string {
-        return this.formatter(this.argument.format());
+    format(toVariable: string|null): string {
+        return this.formatter(this.argument.format(toVariable));
     }
 
     toTex(): string {

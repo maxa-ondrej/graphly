@@ -1,4 +1,5 @@
 import {INDENT, Node, Variables} from "./index";
+import {uniqueJoin} from "../../utils/arrays";
 
 type Computer = (left: number, right: number) => number;
 type Deriver = (left: Node, right: Node, variable: string) => Node;
@@ -26,16 +27,16 @@ class ParentNode implements Node {
         this.texConvertor = texConvertor;
     }
 
-    hasVariable(variable: string): boolean {
-        return this.left.hasVariable(variable) || this.right.hasVariable(variable);
-    }
+    hasVariable = (variable: string) => this.left.hasVariable(variable) || this.right.hasVariable(variable);
+
+    getVariables = () => uniqueJoin(this.left.getVariables(), this.right.getVariables());
 
     compute(variables: Variables): number {
         return this.computer(this.left.compute(variables), this.right.compute(variables));
     }
 
-    format(): string {
-        return `(${this.left.format()} ${this.operator} ${this.right.format()})`;
+    format(toVariable: string|null): string {
+        return `(${this.left.format(toVariable)} ${this.operator} ${this.right.format(toVariable)})`;
     }
 
     toTex(): string {

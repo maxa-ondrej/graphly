@@ -4,7 +4,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {modify, selectDatum} from "./database";
 import parseIt from "../math/eval/parser";
 import lexIt from "../math/eval/lexer";
-import {deriveAndSimplify} from "../math/node";
+import {deriveAndSimplify, deriveSmart} from "../math/node";
 
 export default function LinearInput({ id, errorHandler }: {id: number, errorHandler: (message: string) => void}) {
     const dispatch = useDispatch();
@@ -30,22 +30,21 @@ export default function LinearInput({ id, errorHandler }: {id: number, errorHand
         }
         try {
             let node = parseIt(lexIt(value));
-            console.log(node.tree(''));
             dispatch(modify({
                 id,
                 datum: {
                     datum:  {
-                        fn: node.format(),
+                        fn: node.format('x'),
                         fnType: "linear",
                     },
                     raw: value,
                     fancy: `y = ${node.toTex()}`
                 }
             }));
-            node = deriveAndSimplify(node, 'x');
-            setFirstDerivations(mathEqResolveUrl(node.format() + '=0'));
-            node = deriveAndSimplify(node, 'x');
-            setSecondDerivations(mathEqResolveUrl(node.format() + '=0'));
+            node = deriveSmart(node);
+            setFirstDerivations(mathEqResolveUrl(node.format(null) + '=0'));
+            node = deriveSmart(node);
+            setSecondDerivations(mathEqResolveUrl(node.format(null) + '=0'));
         } catch (e: any) {
             setTimeoutId(setTimeout(() => errorHandler(`${e.name}: ${e.message}`), 1000));
             setFirstDerivations(undefined);
@@ -60,8 +59,8 @@ export default function LinearInput({ id, errorHandler }: {id: number, errorHand
         <div>
             <Row>
                 <Col xs={12}>
-                    <InputGroup className="mb-3">
-                        <InputGroup.Text id="basic-addon1">f(x) = </InputGroup.Text>
+                    <InputGroup>
+                        <InputGroup.Text id="basic-addon1">y = </InputGroup.Text>
                         <Form.Control
                             type="text"
                             value={value}

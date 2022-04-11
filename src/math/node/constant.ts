@@ -1,4 +1,5 @@
 import {Node, Variables, Zero} from "./index";
+import {uniqueJoin} from "../../utils/arrays";
 
 class ParentNode implements Node {
 
@@ -8,6 +9,8 @@ class ParentNode implements Node {
     readonly approximation: number;
 
     hasVariable = () => false;
+    getVariables = () => [];
+
     type = 'constant';
 
     constructor(functionName: string, tex: string, approximation: number) {

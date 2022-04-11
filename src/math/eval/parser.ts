@@ -130,7 +130,7 @@ export class Parser {
             }
             let function1 = this.knownFunctions(value);
             if (function1 !== null) {
-                return function1(this.expression());
+                return function1(this.brackets());
             }
             let function2 = this.knownFunctions(value.substring(0, value.length - 1));
             if (function2 !== null) {

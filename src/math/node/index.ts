@@ -13,13 +13,15 @@ export interface Node {
 
     compute(variables: Variables): number;
 
-    format(): string;
+    format(toVariable: string|null): string;
 
     toTex(): string;
 
     derive(variable: string): Node;
 
     hasVariable(variable: string): boolean;
+
+    getVariables(): string[];
 
     tree(indent: string): string;
 
@@ -30,6 +32,7 @@ export type Variables = Map<string, number>;
 export const Number = (value: number): Node => ({
     type: 'number',
     hasVariable: () => false,
+    getVariables: () => [],
     compute(): number {
         return value;
     },
@@ -37,7 +40,7 @@ export const Number = (value: number): Node => ({
         return `${value}`;
     },
     toTex(): string {
-        return this.format();
+        return `${value}`;
     },
     tree(indent: string): string {
         return indent + value;
@@ -50,11 +53,12 @@ export const Number = (value: number): Node => ({
 export const Variable = (name: string): Node => ({
     type: 'variable',
     hasVariable: (variable: string) => name === variable,
+    getVariables: () => [name],
     compute(variables: Variables): number {
         return variables.get(name) ?? 0;
     },
-    format(): string {
-        return name;
+    format(toVariable: string|null): string {
+        return toVariable ?? name;
     },
     toTex(): string {
         return name;
@@ -67,7 +71,7 @@ export const Variable = (name: string): Node => ({
     }
 });
 
-export const simplify = (node: Node) => parseIt(lexIt(mathSimplify(node.format(), {}, {exactFractions: true}).toString()));
+export const simplify = (node: Node) => parseIt(lexIt(mathSimplify(node.format(null), {}, {exactFractions: true}).toString()));
 
 export const derive = (node: Node, variable: string) => {
     if (node.hasVariable(variable)) {
@@ -78,11 +82,15 @@ export const derive = (node: Node, variable: string) => {
 
 export const deriveAndSimplify = (node: Node, variable: string) => simplify(derive(node, variable));
 
+export const deriveSmart = (node: Node) => deriveAndSimplify(node, node.getVariables()[0]);
+
+export const formatSmart = (node: Node) => node.format(node.getVariables()[0]);
+
 export const nodesEqual = (a: Node, b: Node) => {
     if (a.type !== b.type) {
         return false;
     }
-    return a.format() === b.format();
+    return a.format(null) === b.format(null);
 }
 
 export const Zero = Number(0);
@@ -91,7 +99,7 @@ export const NegativeOne = Number(-1);
 
 export const Negate = (node: Node) => {
     if (node.type === 'number') {
-        return Number(parseInt(node.format()) * (-1));
+        return Number(parseInt(node.format(null)) * (-1));
     }
     return Times(NegativeOne, node);
 };
