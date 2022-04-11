@@ -1,5 +1,5 @@
 {
-  "name": "maturita",
+  "name": "Graphly",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -38,8 +38,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "docs": "typedoc --entryPointStrategy expand ./src",
-    "docs-watch": "typedoc --entryPointStrategy expand ./src --watch",
+    "docs": "typedoc --entryPointStrategy expand --includeVersion ./src",
+    "docs-watch": "typedoc --entryPointStrategy expand --includeVersion ./src --watch",
     "tauri": "tauri"
   },
   "eslintConfig": {
