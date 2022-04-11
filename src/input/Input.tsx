@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {modify as modifyPlot, remove as removePlot} from "../math/plot/database";
-import {Button, Col, Form, Row} from "react-bootstrap";
+import {Button, Col, Form, InputGroup, Row} from "react-bootstrap";
 import LinearInput from "./LinearInput";
 import {deselect, isSelected, remove as removeInput, selectDatum} from "./database";
 import ReactSwitch from "react-switch";
@@ -27,6 +27,12 @@ const inputTypes = [
     {value: 'implicit', label: 'Implicitní funkce'},
 ];
 
+const graphTypes = [
+    {value: 'polyline', label: 'Lomená čára (doporučené)'},
+    {value: 'interval', label: 'Intervalové obdélníky'},
+    {value: 'scatter', label: 'Tečkovaně'},
+];
+
 /**
  * Input component
  *
@@ -35,6 +41,10 @@ const inputTypes = [
 export default function Input({ id }: { id: number }) {
     const [inputType, setInputType] = useState(inputTypes[0].value);
     const [color, setColor] = useState('black');
+    const [nSamples, setNSamples] = useState(100);
+    const [from, setFrom] = useState<undefined|string>(undefined);
+    const [to, setTo] = useState<undefined|string>(undefined);
+    const [graphType, setGraphType] = useState<'polyline' | 'interval' | 'scatter'>('polyline');
     const [visible, setVisible] = useState(true);
     const [error, setError] = useState('');
     const inputRef = useRef(null);
@@ -54,7 +64,9 @@ export default function Input({ id }: { id: number }) {
             datum: visible ? {
                 ...data.datum,
                 color,
-                graphType: 'polyline'
+                graphType,
+                range: from === undefined || to === undefined ? undefined : [parseInt(from), parseInt(to)],
+                nSamples: graphType !== 'scatter' ? undefined : nSamples
             } : null
         }));
         if (hide) {
@@ -67,7 +79,7 @@ export default function Input({ id }: { id: number }) {
             handleSubmit(false);
         }
     // eslint-disable-next-line
-    }, [visible, color]);
+    }, [visible, color, graphType, nSamples, from, to]);
 
 
     const remove = useCallback(() => {
@@ -92,17 +104,39 @@ export default function Input({ id }: { id: number }) {
             </Row>
             <Row className='mb-2'>
                 <Col>
-                    <Form.Select className='w-100' value={inputType} onChange={event => setInputType(event.target.value)}>
+                    <Form.Select title='Typ předpisu' className='w-100' value={inputType} onChange={event => setInputType(event.target.value)}>
                         {inputTypes.map(({label, value}) => <option value={value} key={value}>{label}</option>)}
                     </Form.Select>
                 </Col>
+                <Col>
+                    <InputGroup className="mb-3" title='Definiční obor'>
+                        <InputGroup.Text>D(x) = </InputGroup.Text>
+                        <Form.Control type='number' value={from} onChange={event => setFrom(event.target.value)} placeholder='Od' />
+                        <Form.Control type='number' value={to} onChange={event => setTo(event.target.value)} placeholder='Do' />
+                    </InputGroup>
+                </Col>
             </Row>
             <Row className='mb-2'>
-                <Col sx={4}>
-                    <Form.Control className='w-100' type="color" value={color} onChange={event => setColor(event.target.value)} />
+                <Col xs={graphType !== 'scatter' ? '6' : '4'}>
+                    <Form.Select title='Typ grafu' className='w-100' value={graphType} onChange={event => {
+                        if (['polyline', 'interval', 'scatter'].includes(event.target.value)) {
+                            // @ts-ignore
+                            setGraphType(event.target.value)
+                        }
+                    }}>
+                        {graphTypes.map(({label, value}) => <option value={value} key={value}>{label}</option>)}
+                    </Form.Select>
                 </Col>
-                <Col sx={4}>
-                    <ReactSwitch className='w-100' checked={visible} onChange={checked => setVisible(checked)} />
+                <Col className={graphType !== 'scatter' ? 'd-none' : 'col-2'}>
+                    <Form.Control type='number' value={nSamples} onChange={event => setNSamples(parseInt(event.target.value))} title='Počet teček' />
+                </Col>
+                <Col xs={3}>
+                    <Form.Control className='w-100' type="color" value={color} onChange={event => setColor(event.target.value)} title='Barva grafu' />
+                </Col>
+                <Col xs={3}>
+                    <div className='mt-1' title={visible ? 'Skrýt graf' : 'Zobrazit graf'}>
+                        <ReactSwitch checked={visible} onChange={checked => setVisible(checked)} />
+                    </div>
                 </Col>
             </Row>
             <Row className='mb-2'>

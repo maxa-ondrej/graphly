@@ -4,7 +4,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {modify, selectDatum} from "./database";
 import parseIt from "../math/eval/parser";
 import lexIt from "../math/eval/lexer";
-import {deriveAndSimplify, deriveSmart} from "../math/node";
+import {deriveSmart} from "../math/node";
 
 export default function LinearInput({ id, errorHandler }: {id: number, errorHandler: (message: string) => void}) {
     const dispatch = useDispatch();
@@ -30,6 +30,10 @@ export default function LinearInput({ id, errorHandler }: {id: number, errorHand
         }
         try {
             let node = parseIt(lexIt(value));
+            let variables = node.getVariables();
+            if (variables.length > 1) {
+                throw new Error(`Used too many variables (${variables.length}): ${JSON.stringify(variables)}`)
+            }
             dispatch(modify({
                 id,
                 datum: {
@@ -60,7 +64,7 @@ export default function LinearInput({ id, errorHandler }: {id: number, errorHand
             <Row>
                 <Col xs={12}>
                     <InputGroup>
-                        <InputGroup.Text id="basic-addon1">y = </InputGroup.Text>
+                        <InputGroup.Text id="basic-addon1">f(x) = </InputGroup.Text>
                         <Form.Control
                             type="text"
                             value={value}
