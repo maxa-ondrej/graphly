@@ -41,5 +41,5 @@ export default function Plot({width, height}: { width: number, height: number })
         }
     }, [data, width, height])
 
-    return (<div ref={rootEl}/>);
+    return (<div className='mt-2' ref={rootEl}/>);
 }
