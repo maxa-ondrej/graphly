@@ -46,7 +46,7 @@ export default function Input({ id }: { id: number }) {
     const [nSamples, setNSamples] = useState(100);
     const [from, setFrom] = useState<undefined|string>(undefined);
     const [to, setTo] = useState<undefined|string>(undefined);
-    const [graphType, setGraphType] = useState<'polyline' | 'interval' | 'scatter'>('polyline');
+    const [graphType, setGraphType] = useState<'polyline' | 'interval' | 'scatter'>(inputType === 'implicit' ? 'interval' : 'polyline');
     const [visible, setVisible] = useState(true);
     const dispatch = useDispatch();
     const data = useSelector(selectDatum(id));
@@ -103,12 +103,17 @@ export default function Input({ id }: { id: number }) {
             </Row>
             <Row className='mb-2'>
                 <Col>
-                    <Form.Select title='Typ předpisu' className='w-100' value={inputType} onChange={event => setInputType(event.target.value)}>
+                    <Form.Select title='Typ předpisu' className='w-100' value={inputType} onChange={event => {
+                        if (event.target.value === 'implicit') {
+                            setGraphType('interval');
+                        }
+                        setInputType(event.target.value)
+                    }}>
                         {inputTypes.map(({label, value}) => <option value={value} key={value}>{label}</option>)}
                     </Form.Select>
                 </Col>
                 <Col>
-                    <InputGroup className="mb-3" title='Definiční obor'>
+                    <InputGroup title='Definiční obor'>
                         <InputGroup.Text>D(x) = </InputGroup.Text>
                         <Form.Control type='number' value={from} onChange={event => setFrom(event.target.value)} placeholder='Od' />
                         <Form.Control type='number' value={to} onChange={event => setTo(event.target.value)} placeholder='Do' />
@@ -117,7 +122,7 @@ export default function Input({ id }: { id: number }) {
             </Row>
             <Row className='mb-2'>
                 <Col xs={graphType !== 'scatter' ? '6' : '4'}>
-                    <Form.Select title='Typ grafu' className='w-100' value={graphType} onChange={event => {
+                    <Form.Select disabled={inputType === 'implicit'} title='Typ grafu' className='w-100' value={graphType} onChange={event => {
                         if (['polyline', 'interval', 'scatter'].includes(event.target.value)) {
                             // @ts-ignore
                             setGraphType(event.target.value)

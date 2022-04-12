@@ -70,9 +70,9 @@ export default function ImplicitInput({ id }: {id: number}) {
                         <Form.Control
                             type="text"
                             value={value}
-                            className={valid ? '' : 'border border-danger'}
                             onChange={event => setValue(event.target.value)}
                             placeholder="Předpis funkce"
+                            isInvalid={!valid}
                         />
                         <Popover message={error} placement='bottom' target={inputRef.current} show={error !== ''} />
                     </InputGroup>
