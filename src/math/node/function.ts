@@ -4,7 +4,9 @@ type Formatter = (argument: string) => string;
 type Computer = (argument: number) => number;
 type Deriver = (argument: Node, variable: string) => Node;
 
-class ParentNode implements Node {
+export const isFunction = (node: Node) => node instanceof FunctionNode && (node.name !== 'NEGATE' || node.argument.type === NodeType.FUNCTION);
+
+export class FunctionNode implements Node {
 
     type = NodeType.FUNCTION;
 
@@ -39,7 +41,7 @@ class ParentNode implements Node {
     }
 
     toTex(): string {
-        return this.tex + (this.argument.type === NodeType.BINARY_OPERATOR ? putInTexBrackets(this.argument.toTex()) : this.argument.toTex());
+        return this.tex + (this.argument.type === NodeType.BINARY_OPERATOR || (isFunction(this.argument) && this.name !== 'NEGATE') ? putInTexBrackets(this.argument.toTex()) : this.argument.toTex());
     }
 
     tree(indent: string = ''): string {
@@ -52,4 +54,4 @@ class ParentNode implements Node {
 
 }
 
-export const Function = (name: string, formatter: Formatter, computer: Computer, deriver: Deriver, tex: string) => (argument: Node) => new ParentNode(argument, name, formatter, computer, deriver, tex);
+export const Function = (name: string, formatter: Formatter, computer: Computer, deriver: Deriver, tex: string) => (argument: Node) => new FunctionNode(argument, name, formatter, computer, deriver, tex);

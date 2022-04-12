@@ -1,6 +1,6 @@
 import {Node, NodeType, Variables, Zero} from "./index";
 
-class ParentNode implements Node {
+export class ConstantNode implements Node {
 
     readonly tex: string;
     readonly functionName: string;
@@ -45,4 +45,4 @@ class ParentNode implements Node {
 
 }
 
-export const Constant = (functionName: string, tex: string, approximation: number) => new ParentNode(functionName, tex, approximation);
+export const Constant = (functionName: string, tex: string, approximation: number) => new ConstantNode(functionName, tex, approximation);

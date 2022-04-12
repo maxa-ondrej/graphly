@@ -1,11 +1,12 @@
 import {INDENT, Node, NodeType, putInTexBrackets, Variables} from "./index";
 import {uniqueJoin} from "../../utils/arrays";
+import {FunctionNode, isFunction} from "./function";
 
 type Computer = (left: number, right: number) => number;
 type Deriver = (left: Node, right: Node, variable: string) => Node;
 type TexConvertor = (left: string, right: string) => string;
 
-class ParentNode implements Node {
+export class BinaryNode implements Node {
 
     type = NodeType.BINARY_OPERATOR;
 
@@ -35,7 +36,7 @@ class ParentNode implements Node {
         return this.computer(this.left.compute(variables), this.right.compute(variables));
     }
 
-    format(toVariable: string|null): string {
+    format(toVariable: string | null): string {
         return `(${this.left.format(toVariable)} ${this.operator} ${this.right.format(toVariable)})`;
     }
 
@@ -43,11 +44,11 @@ class ParentNode implements Node {
         const left = this.left.toTex();
         const leftInBrackets = putInTexBrackets(left);
         const leftIsBinary = this.left.type === NodeType.BINARY_OPERATOR;
-        const leftIsPlusOrMinus = this.left instanceof ParentNode && ['+', '-'].includes(this.left.operator);
+        const leftIsPlusOrMinus = this.left instanceof BinaryNode && ['+', '-'].includes(this.left.operator);
         const right = this.right.toTex();
         const rightInBrackets = putInTexBrackets(right);
         const rightIsBinary = this.right.type === NodeType.BINARY_OPERATOR;
-        const rightIsPlusOrMinus = this.right instanceof ParentNode && ['+', '-'].includes(this.right.operator);
+        const rightIsPlusOrMinus = this.right instanceof BinaryNode && ['+', '-'].includes(this.right.operator);
         if ((!leftIsBinary && !rightIsBinary && this.left.type !== NodeType.FUNCTION) || this.operator === '+') {
             return this.texConvertor(left, right);
         }
@@ -61,11 +62,11 @@ class ParentNode implements Node {
         }
 
         if (this.operator === '*') {
-            return this.texConvertor(leftIsPlusOrMinus || this.left.type === NodeType.FUNCTION ? leftInBrackets : left, rightIsPlusOrMinus ? rightInBrackets : right);
+            return this.texConvertor(leftIsPlusOrMinus || isFunction(this.left) ? leftInBrackets : left, rightIsPlusOrMinus ? rightInBrackets : right);
         }
 
         if (this.operator === '^') {
-            return this.texConvertor(this.left instanceof ParentNode && this.left.operator === '^' ? leftInBrackets : left, rightIsPlusOrMinus ? rightInBrackets : right);
+            return this.texConvertor(this.left instanceof BinaryNode && this.left.operator === '^' ? leftInBrackets : left, rightIsPlusOrMinus ? rightInBrackets : right);
         }
 
         return this.texConvertor(left, right);
@@ -83,4 +84,4 @@ class ParentNode implements Node {
 
 export type BinaryConstructor = (left: Node, right: Node) => Node;
 
-export const Binary = (operator: string, name: string, computer: Computer, deriver: Deriver, texConvertor: TexConvertor): BinaryConstructor => (left: Node, right: Node) => new ParentNode(left, right, operator, name, computer, deriver, texConvertor);
+export const Binary = (operator: string, name: string, computer: Computer, deriver: Deriver, texConvertor: TexConvertor): BinaryConstructor => (left: Node, right: Node) => new BinaryNode(left, right, operator, name, computer, deriver, texConvertor);
