@@ -1,4 +1,5 @@
-import {derive, INDENT, Node, NodeType, putInTexBrackets, Times, Variables} from "./index";
+import {INDENT, Node, NodeType, Times, Variables} from "./index";
+import {derive, putInTexBrackets} from "../../utils/nodes";
 
 type Formatter = (argument: string) => string;
 type Computer = (argument: number) => number;

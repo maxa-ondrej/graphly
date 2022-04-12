@@ -13,3 +13,11 @@ ReactDOM.render(
   </React.StrictMode>,
   document.getElementById('root')
 );
+export {calcValues} from "./utils/nodes";
+export {putInTexBrackets} from "./utils/nodes";
+export {formatSmart} from "./utils/nodes";
+export {deriveImplicit} from "./utils/nodes";
+export {deriveSmart} from "./utils/nodes";
+export {deriveAndSimplify} from "./utils/nodes";
+export {derive} from "./utils/nodes";
+export {simplify} from "./utils/nodes";

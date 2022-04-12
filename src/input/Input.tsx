@@ -66,6 +66,8 @@ export default function Input({ id }: { id: number }) {
 
         dispatch(modifyPlot({
             id,
+            min: data.min,
+            max: data.max,
             datum: visible ? {
                 ...data.datum,
                 color,

@@ -1,9 +1,7 @@
 import {Binary} from "./binary";
 import {Function} from "./function";
 import {Constant} from "./constant";
-import {simplify as mathSimplify} from "mathjs";
-import parseIt from "../eval/parser";
-import lexIt from "../eval/lexer";
+import {derive} from "../../utils/nodes";
 
 export const INDENT = '  ';
 
@@ -79,26 +77,7 @@ export const Variable = (name: string): Node => ({
     }
 });
 
-export const simplify = (node: Node) => parseIt(lexIt(mathSimplify(node.format(null), {}, {exactFractions: true}).toString()));
-
-export const derive = (node: Node, variable: string) => {
-    if (node.hasVariable(variable)) {
-        return node.derive(variable);
-    }
-    return Zero;
-}
-
-export const deriveAndSimplify = (node: Node, variable: string) => simplify(derive(node, variable));
-
-export const deriveSmart = (node: Node) => deriveAndSimplify(node, node.getVariables()[0]);
-
-export const deriveImplicit = (node: Node) => Negate(Divide(deriveAndSimplify(node, 'x'), deriveAndSimplify(node, 'y')));
-
-export const formatSmart = (node: Node) => node.format(node.getVariables()[0]);
-
-export const putInTexBrackets = (text: string) => `\\left(${text}\\right)`;
-
-export const nodesEqual = (a: Node, b: Node) => {
+const nodesEqual = (a: Node, b: Node) => {
     if (a.type !== b.type) {
         return false;
     }
@@ -133,7 +112,7 @@ export const Minus = Binary('-', 'MINUS', (a, b) => a - b, (a, b, variable) => {
         return Negate(derB);
     }
     return Minus(derA, derB);
-}, (left, right) => `${left} - ${right}`);
+}, (left, right) => `${left} - ${right} `);
 export const Times = Binary('*', 'TIMES', (a, b) => a * b, (a, b, variable) => {
     let derA = derive(a, variable);
     if (!b.hasVariable(variable)) {

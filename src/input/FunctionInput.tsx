@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from "react";
 import {Col, Form, InputGroup, Row} from "react-bootstrap";
 import parseIt from "../math/eval/parser";
 import lexIt from "../math/eval/lexer";
-import {deriveSmart, Node} from "../math/node";
+import {Node} from "../math/node";
 import Popover from "../components/Popover";
 import Derivations from "./Derivations";
 import {useSelector} from "react-redux";
@@ -43,7 +43,6 @@ export default function FunctionInput({id, saveValue, title, placeholder, allowe
         } catch (e: any) {
             setNode(undefined);
             saveValue(undefined, value);
-            console.error(e);
             setTimeoutId(setTimeout(() => setError(`${e.name}: ${e.message}`), 1000));
         }
     }

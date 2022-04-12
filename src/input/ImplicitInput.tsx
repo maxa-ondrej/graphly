@@ -1,8 +1,9 @@
 import React from "react";
 import {useDispatch} from "react-redux";
 import {modify} from "./database";
-import {deriveImplicit, Node} from "../math/node";
+import {Node} from "../math/node";
 import FunctionInput from "./FunctionInput";
+import {deriveImplicit} from "../utils/nodes";
 
 export default function ImplicitInput({ id }: {id: number}) {
     const dispatch = useDispatch();
@@ -18,6 +19,8 @@ export default function ImplicitInput({ id }: {id: number}) {
                     fn: node.format(null),
                     fnType: "implicit",
                 },
+                min: [0, 0],
+                max: [0, 0],
                 raw,
                 fancy: `${node.toTex()} = 0`
             }

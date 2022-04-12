@@ -1,6 +1,7 @@
-import {INDENT, Node, NodeType, putInTexBrackets, Variables} from "./index";
+import {INDENT, Node, NodeType, Variables} from "./index";
 import {uniqueJoin} from "../../utils/arrays";
-import {FunctionNode, isFunction} from "./function";
+import {isFunction} from "./function";
+import {putInTexBrackets} from "../../utils/nodes";
 
 type Computer = (left: number, right: number) => number;
 type Deriver = (left: Node, right: Node, variable: string) => Node;

@@ -1,6 +1,7 @@
 import {createSlice, Draft, PayloadAction, SliceCaseReducers} from '@reduxjs/toolkit'
 import {StateType} from "../../store";
 import {FunctionPlotDatum} from "function-plot/dist/types";
+import {weightedAverage} from "../../utils/math";
 
 /**
  * The type of the state of database for saving plot recipes.
@@ -9,12 +10,16 @@ export interface PlotStateType {
     recipes: RecipeWithId[],
 }
 
+export type WeightedValue = [number, number];
+
 /**
  * The recipe saved with a given id.
  */
 export interface RecipeWithId {
     readonly id: number,
-    datum: FunctionPlotDatum | null
+    datum: FunctionPlotDatum | null,
+    min: WeightedValue,
+    max: WeightedValue,
 }
 
 /**
@@ -47,6 +52,22 @@ export const selectAllData = (state: Draft<StateType>): FunctionPlotDatum[] => {
     return state.plot.recipes
         .filter((recipe) => recipe.datum !== null)
         .map(recipe => Object.assign({}, recipe.datum));
+}
+
+/**
+ * Select min and max values of all graphs.
+ *
+ * @param state
+ */
+export const selectMinAndMax = (state: Draft<StateType>): [number, number] => {
+    if (state.plot.recipes.length === 0) {
+        return [-10, 10];
+    }
+
+    return [
+        weightedAverage(state.plot.recipes.map((recipe) => recipe.min), 2) * 1.3,
+        weightedAverage(state.plot.recipes.map((recipe) => recipe.max), 2) * 1.3,
+    ];
 }
 
 /**
