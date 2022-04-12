@@ -12,11 +12,11 @@ export default function Derivations({ node, derivator }: {node: Node | undefined
             return;
         }
 
-        node = derivator(node);
-        setFirstDerivations(mathEqResolveUrl(node.format(null) + '=0'));
-        node = derivator(node);
-        setSecondDerivations(mathEqResolveUrl(node.format(null) + '=0'));
-    }, [node]);
+        let node1 = derivator(node);
+        setFirstDerivations(mathEqResolveUrl(node1.format(null) + '=0'));
+        let node2 = derivator(node1);
+        setSecondDerivations(mathEqResolveUrl(node2.format(null) + '=0'));
+    }, [node, derivator]);
 
 
     return (

@@ -2,7 +2,6 @@ import React, {useEffect, useRef} from 'react'
 import functionPlot from 'function-plot'
 import {useSelector} from "react-redux";
 import {selectAllData, selectMinAndMax} from "./database";
-import store from "../../store";
 
 export const xMin = -10;
 export const xMax = 10;
@@ -11,7 +10,6 @@ export default function Plot({width, height}: { width: number, height: number })
     const rootEl = useRef(null);
     const data = useSelector(selectAllData);
     const yDomain = useSelector(selectMinAndMax);
-    console.log(store.getState())
 
     useEffect(() => {
         try {
@@ -39,7 +37,7 @@ export default function Plot({width, height}: { width: number, height: number })
         } catch (e) {
             console.error(e);
         }
-    }, [data, width, height])
+    }, [data, width, height, yDomain])
 
     return (<div className='mt-2' ref={rootEl}/>);
 }
