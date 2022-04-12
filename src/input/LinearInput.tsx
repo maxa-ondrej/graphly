@@ -5,6 +5,12 @@ import {Node} from "../math/node";
 import FunctionInput from "./FunctionInput";
 import {wightedMinAndMax} from "../utils/nodes";
 
+/**
+ * Input for linear equations (where y can be separated).
+ *
+ * @param id the id of the input
+ * @constructor
+ */
 export default function LinearInput({ id }: {id: number}) {
     const dispatch = useDispatch();
 

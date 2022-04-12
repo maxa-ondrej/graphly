@@ -10,6 +10,9 @@ export interface PlotStateType {
     recipes: RecipeWithId[],
 }
 
+/**
+ * First number is the value and second is the weight.
+ */
 export type WeightedValue = [number, number];
 
 /**

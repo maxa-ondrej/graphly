@@ -8,6 +8,9 @@ import Derivations from "./Derivations";
 import {useSelector} from "react-redux";
 import {selectDatum} from "./database";
 
+/**
+ * Props for FunctionInput component.
+ */
 interface FunctionInputProps {
     id: number,
     title: string,
@@ -17,6 +20,17 @@ interface FunctionInputProps {
     derivator?: ((node: Node) => Node) | undefined
 }
 
+/**
+ * Shared component for getting users input as a node.
+ *
+ * @param id the id of the input
+ * @param saveValue the function called to save input to the database
+ * @param title the prefix of the input element
+ * @param placeholder the placeholder in the input element
+ * @param allowedVars how many different variables are allowed
+ * @param derivator the function used for derivations, null if derivations are not allowed
+ * @constructor
+ */
 export default function FunctionInput({id, saveValue, title, placeholder, allowedVars, derivator = undefined}: FunctionInputProps) {
     const inputRef = useRef(null);
     const [error, setError] = useState('');

@@ -5,6 +5,12 @@ import {Node} from "../math/node";
 import FunctionInput from "./FunctionInput";
 import {deriveImplicit} from "../utils/nodes";
 
+/**
+ * Input element for Implicit functions (where y cannot be separated).
+ *
+ * @param id
+ * @constructor
+ */
 export default function ImplicitInput({ id }: {id: number}) {
     const dispatch = useDispatch();
 

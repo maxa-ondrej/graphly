@@ -9,17 +9,24 @@ import MathJax from "../components/MathJax";
 import ImplicitInput from "./ImplicitInput";
 import './Input.css';
 import Popover from "../components/Popover";
+import {ParametricInput} from "./ParametricInput";
 
+/**
+ * Returns corresponding input element depending on the type.
+ *
+ * @param type the type of input
+ * @param id the id of the input
+ */
 export function parseInput(type: string, id: number) {
     switch (type) {
         case "linear":
             return <LinearInput id={id} />;
         case 'parametric':
-            return <p>ToBeDone</p>;
+            return <ParametricInput id={id} />;
         case 'implicit':
             return <ImplicitInput id={id} />;
         default:
-            return <p>Error</p>;
+            return <p>Input type not supported yet.</p>;
     }
 
 }

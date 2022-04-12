@@ -2,6 +2,13 @@ import React, {useEffect, useState} from "react";
 import {Button, Col, Row} from "react-bootstrap";
 import {Node} from "../math/node";
 
+/**
+ * Displays buttons for derivations.
+ *
+ * @param node the node that will be derivated
+ * @param derivator the function used for derivations
+ * @constructor
+ */
 export default function Derivations({ node, derivator }: {node: Node | undefined, derivator: (node: Node) => Node}) {
     const [firstDerivations, setFirstDerivations] = useState<string|undefined>(undefined);
     const [secondDerivations, setSecondDerivations] = useState<string|undefined>(undefined);

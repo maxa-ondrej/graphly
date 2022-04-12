@@ -5,6 +5,11 @@ import Input from "./Input";
 import {Button} from "react-bootstrap";
 import {create, select, selectIds, selectLastId} from "./database";
 
+/**
+ * All inputs joined in a single component.
+ *
+ * @constructor
+ */
 export default function Inputs() {
     const dispatch = useDispatch();
     const inputs = useSelector(selectIds());

@@ -6,6 +6,13 @@ import {selectAllData, selectMinAndMax} from "./database";
 export const xMin = -10;
 export const xMax = 10;
 
+/**
+ * The heart of the application. This components selects data from databases and plots it.
+ *
+ * @param width width of the plot
+ * @param height height of the plot
+ * @constructor
+ */
 export default function Plot({width, height}: { width: number, height: number }) {
     const rootEl = useRef(null);
     const data = useSelector(selectAllData);
@@ -21,7 +28,7 @@ export default function Plot({width, height}: { width: number, height: number })
                 data: [
                     ...data,
                 ],
-                title: `Graphly`,
+                title: 'Graphly',
                 grid: true,
                 xAxis: {
                     label: 'osa x',
