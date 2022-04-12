@@ -67,6 +67,8 @@ export const selectMinAndMax = (state: Draft<StateType>): [number, number] => {
         return [-10, 10];
     }
 
+    console.log(state.plot.recipes.map((recipe) => recipe.min), weightedAverage(state.plot.recipes.map((recipe) => recipe.min), 2) * 1.3);
+
     return [
         weightedAverage(state.plot.recipes.map((recipe) => recipe.min), 2) * 1.3,
         weightedAverage(state.plot.recipes.map((recipe) => recipe.max), 2) * 1.3,

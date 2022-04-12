@@ -1,18 +1,16 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useRef, useState} from "react";
 import {Col, Form, InputGroup, Row} from "react-bootstrap";
 import parseIt from "../math/eval/parser";
 import lexIt from "../math/eval/lexer";
 import {Node} from "../math/node";
 import Popover from "../components/Popover";
 import Derivations from "./Derivations";
-import {useSelector} from "react-redux";
-import {selectDatum} from "./database";
 
 /**
  * Props for FunctionInput component.
  */
 interface FunctionInputProps {
-    id: number,
+    valueSelector: () => string,
     title: string,
     allowedVars: number,
     placeholder: string,
@@ -23,7 +21,7 @@ interface FunctionInputProps {
 /**
  * Shared component for getting users input as a node.
  *
- * @param id the id of the input
+ * @param valueSelector the function called to get current value
  * @param saveValue the function called to save input to the database
  * @param title the prefix of the input element
  * @param placeholder the placeholder in the input element
@@ -31,14 +29,14 @@ interface FunctionInputProps {
  * @param derivator the function used for derivations, null if derivations are not allowed
  * @constructor
  */
-export default function FunctionInput({id, saveValue, title, placeholder, allowedVars, derivator = undefined}: FunctionInputProps) {
+export default function FunctionInput({valueSelector, saveValue, title, placeholder, allowedVars, derivator = undefined}: FunctionInputProps) {
     const inputRef = useRef(null);
     const [error, setError] = useState('');
-    const [value, setValue] = useState(useSelector(selectDatum(id))?.raw ?? '');
+    const [value, setValue] = useState(valueSelector());
     const [node, setNode] = useState<Node|undefined>(undefined);
     const [timeout, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
-    const updateData = () => {
+    const updateData = (value: string) => {
         setError('');
         if (timeout !== null) {
             clearTimeout(timeout);
@@ -61,9 +59,6 @@ export default function FunctionInput({id, saveValue, title, placeholder, allowe
         }
     }
 
-    // eslint-disable-next-line
-    useEffect(updateData, [value]);
-
     function addDerivations() {
         if (derivator === undefined) {
             return <></>;
@@ -80,7 +75,12 @@ export default function FunctionInput({id, saveValue, title, placeholder, allowe
                         <Form.Control
                             type="text"
                             value={value}
-                            onChange={event => setValue(event.target.value)}
+                            onChange={event => {
+                                const input = event.target.value;
+                                console.log(input);
+                                setValue(input);
+                                updateData(input);
+                            }}
                             placeholder={placeholder}
                             isInvalid={error !== ''}
                         />

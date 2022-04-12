@@ -25,7 +25,7 @@ export interface ParsedData {
  */
 export interface Data {
     datum: FunctionPlotDatum,
-    raw: string,
+    raw: string[],
     fancy: string,
     min: WeightedValue,
     max: WeightedValue

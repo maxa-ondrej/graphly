@@ -9,22 +9,21 @@ import MathJax from "../components/MathJax";
 import ImplicitInput from "./ImplicitInput";
 import './Input.css';
 import Popover from "../components/Popover";
-import {ParametricInput} from "./ParametricInput";
+import {FunctionPlotDatum} from "function-plot/dist/types";
 
 /**
  * Returns corresponding input element depending on the type.
  *
  * @param type the type of input
  * @param id the id of the input
+ * @param save saves the input and updates plot
  */
-export function parseInput(type: string, id: number) {
+export function parseInput(type: string, id: number, save: (datum: FunctionPlotDatum) => void) {
     switch (type) {
         case "linear":
-            return <LinearInput id={id} />;
-        case 'parametric':
-            return <ParametricInput id={id} />;
+            return <LinearInput id={id} save={save} />;
         case 'implicit':
-            return <ImplicitInput id={id} />;
+            return <ImplicitInput id={id} save={save} />;
         default:
             return <p>Input type not supported yet.</p>;
     }
@@ -33,7 +32,6 @@ export function parseInput(type: string, id: number) {
 
 const inputTypes = [
     {value: 'linear', label: 'Funkce (explicitní)'},
-    {value: 'parametric', label: 'Parametrické zadaní'},
     {value: 'implicit', label: 'Implicitní funkce'},
 ];
 
@@ -63,7 +61,7 @@ export default function Input({ id }: { id: number }) {
     const selected = useSelector(isSelected(id));
 
 
-    const handleSubmit = (hide: boolean) => {
+    const handleSubmit = (hide: boolean, datum: FunctionPlotDatum | undefined = undefined) => {
         if (data === null) {
             setError('You need to enter the function details first!');
             setTimeout(() => setError(''), 3000);
@@ -76,7 +74,7 @@ export default function Input({ id }: { id: number }) {
             min: data.min,
             max: data.max,
             datum: visible ? {
-                ...data.datum,
+                ...(datum === undefined ? data.datum : datum),
                 color,
                 graphType,
                 range: from === undefined || to === undefined ? undefined : [parseInt(from), parseInt(to)],
@@ -109,10 +107,13 @@ export default function Input({ id }: { id: number }) {
         <Form onSubmit={event => {
             handleSubmit(true);
             event.preventDefault();
+        }} onBlur={event => {
+            handleSubmit(true);
+            event.preventDefault();
         }}>
             <Row className='mt-2 mb-2'>
                 <Col ref={inputRef}>
-                    {parseInput(inputType, id)}
+                    {parseInput(inputType, id, (datum: FunctionPlotDatum) => handleSubmit(false, datum))}
                 </Col>
                 <Popover message={error} placement='bottom' target={inputRef.current} show={error !== ''}/>
             </Row>
