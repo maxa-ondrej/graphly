@@ -41,7 +41,7 @@ export class FunctionNode implements Node {
     }
 
     toTex(): string {
-        return this.tex + (this.argument.type === NodeType.BINARY_OPERATOR || (isFunction(this.argument) && this.name !== 'NEGATE') ? putInTexBrackets(this.argument.toTex()) : this.argument.toTex());
+        return this.tex + ' ' + (this.argument.type === NodeType.BINARY_OPERATOR || (isFunction(this.argument) && this.name !== 'NEGATE') ? putInTexBrackets(this.argument.toTex()) : this.argument.toTex());
     }
 
     tree(indent: string = ''): string {

@@ -8,6 +8,7 @@ import ReactSwitch from "react-switch";
 import MathJax from "../components/MathJax";
 import ImplicitInput from "./ImplicitInput";
 import './Input.css';
+import Popover from "../components/Popover";
 
 export function parseInput(type: string, id: number) {
     switch (type) {
@@ -41,6 +42,8 @@ const graphTypes = [
  * @prop id - The ID assigned to this input and the corresponding plot.
  */
 export default function Input({ id }: { id: number }) {
+    const inputRef = useRef(null);
+    const [error, setError] = useState('');
     const [inputType, setInputType] = useState(inputTypes[0].value);
     const [color, setColor] = useState('black');
     const [nSamples, setNSamples] = useState(100);
@@ -55,9 +58,11 @@ export default function Input({ id }: { id: number }) {
 
     const handleSubmit = (hide: boolean) => {
         if (data === null) {
-            alert('You need to enter the function details first!');
+            setError('You need to enter the function details first!');
+            setTimeout(() => setError(''), 3000);
             return;
         }
+        setError('');
 
         dispatch(modifyPlot({
             id,
@@ -97,9 +102,10 @@ export default function Input({ id }: { id: number }) {
             event.preventDefault();
         }}>
             <Row className='mt-2 mb-2'>
-                <Col>
+                <Col ref={inputRef}>
                     {parseInput(inputType, id)}
                 </Col>
+                <Popover message={error} placement='bottom' target={inputRef.current} show={error !== ''}/>
             </Row>
             <Row className='mb-2'>
                 <Col>
@@ -144,7 +150,7 @@ export default function Input({ id }: { id: number }) {
                 </Col>
             </Row>
             <Row className='mb-2'>
-                <Col>
+                <Col className='ms-auto'>
                     <Button variant="primary" type="submit">Uložit</Button>
                 </Col>
                 <Col>

@@ -25,8 +25,7 @@ export default function Plot({width, height}: { width: number, height: number}) 
         } catch (e) {
             console.error(e);
         }
-    // eslint-disable-next-line
-    }, [data])
+    }, [data, width, height])
 
     return (<div ref={rootEl}/>);
 }

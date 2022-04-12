@@ -1,7 +1,7 @@
 import {Binary} from "./binary";
 import {Function} from "./function";
 import {Constant} from "./constant";
-import {arg, simplify as mathSimplify} from "mathjs";
+import {simplify as mathSimplify} from "mathjs";
 import parseIt from "../eval/parser";
 import lexIt from "../eval/lexer";
 

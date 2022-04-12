@@ -4,7 +4,7 @@ import Inputs from "./input/Inputs";
 import {Col, Row} from "react-bootstrap";
 
 function getWindowDimensions() {
-    const { innerWidth: width, innerHeight: height } = window;
+    const {innerWidth: width, innerHeight: height} = window;
     return {
         width,
         height
@@ -31,14 +31,19 @@ export function useWindowDimensions() {
  * The App component
  */
 export default function App() {
-    const { height, width } = useWindowDimensions();
+    const {height, width} = useWindowDimensions();
     const phone = width < 992;
 
     return (
         <div className="App">
             <Row>
-                <Col className='order-2 order-lg-1' xs={12} lg={4}><Inputs /></Col>
-                <Col className='order-1 order-lg-2' xs={12} lg={8}><Plot width={phone ? width : width / 2} height={phone ? Math.min(width * 3 / 4, height * 0.6) : Math.min(width * 3 / 8, height)} /></Col>
+                <Col className='order-2 order-lg-1' xs={12} lg={4}>
+                    <Inputs/>
+                </Col>
+                <Col className='order-1 order-lg-2' xs={12} lg={8}>
+                    <Plot width={phone ? width : width / 2}
+                          height={phone ? Math.min(width * 3 / 4, height * 0.6) : Math.min(width * 3 / 8, height)}/>
+                </Col>
             </Row>
         </div>
     );
