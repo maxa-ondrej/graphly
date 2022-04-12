@@ -4,18 +4,18 @@ import {useDispatch, useSelector} from "react-redux";
 import {modify, selectDatum} from "./database";
 import parseIt from "../math/eval/parser";
 import lexIt from "../math/eval/lexer";
-import {deriveSmart} from "../math/node";
+import {deriveAndSimplify, deriveImplicit, deriveSmart, Negate} from "../math/node";
 import Popover from "../components/Popover";
 
-export default function LinearInput({ id }: {id: number}) {
+export default function ImplicitInput({ id }: {id: number}) {
     const dispatch = useDispatch();
     const datum = useSelector(selectDatum(id));
     let input = '';
-    if (datum !== null && datum.datum.fnType === "linear") {
+    if (datum !== null && datum.datum.fnType === "implicit") {
         input = `${datum.raw}`;
     }
-    const [error, setError] = useState('');
     const inputRef = useRef(null);
+    const [error, setError] = useState('');
     const [valid, setValid] = useState(true);
     const [value, setValue] = useState(input);
     const [timeout, setTimeoutId] = useState<NodeJS.Timeout|null>(null);
@@ -34,30 +34,24 @@ export default function LinearInput({ id }: {id: number}) {
         }
         try {
             let node = parseIt(lexIt(value));
-            let variables = node.getVariables();
-            if (variables.length > 1) {
-                throw new Error(`Used too many variables (${variables.length}): ${JSON.stringify(variables)}`)
-            }
-            console.log(node.tree(''));
             dispatch(modify({
                 id,
                 datum: {
                     datum:  {
-                        fn: node.format('x'),
-                        fnType: "linear",
+                        fn: node.format(null),
+                        fnType: "implicit",
                     },
                     raw: value,
-                    fancy: `y = ${node.toTex()}`
+                    fancy: `${node.toTex()} = 0`
                 }
             }));
-            node = deriveSmart(node);
+            node = deriveImplicit(node);
             setFirstDerivations(mathEqResolveUrl(node.format(null) + '=0'));
-            node = deriveSmart(node);
+            node = deriveImplicit(node);
             setSecondDerivations(mathEqResolveUrl(node.format(null) + '=0'));
             setValid(true);
         } catch (e: any) {
             setValid(false);
-            console.error(e);
             setTimeoutId(setTimeout(() => setError(`${e.name}: ${e.message}`), 1000));
             setFirstDerivations(undefined);
             setSecondDerivations(undefined);
@@ -72,7 +66,7 @@ export default function LinearInput({ id }: {id: number}) {
             <Row>
                 <Col xs={12} ref={inputRef}>
                     <InputGroup>
-                        <InputGroup.Text id="basic-addon1">f(x) = </InputGroup.Text>
+                        <InputGroup.Text id="basic-addon1">f(x, y) = </InputGroup.Text>
                         <Form.Control
                             type="text"
                             value={value}

@@ -1,29 +1,27 @@
-import {derive, INDENT, Node, Times, Variables} from "./index";
-import {uniqueJoin} from "../../utils/arrays";
+import {derive, INDENT, Node, NodeType, putInTexBrackets, Times, Variables} from "./index";
 
 type Formatter = (argument: string) => string;
 type Computer = (argument: number) => number;
 type Deriver = (argument: Node, variable: string) => Node;
-type TexConvertor = (argument: string) => string;
 
 class ParentNode implements Node {
 
-    type = 'function';
+    type = NodeType.FUNCTION;
 
     readonly argument: Node;
     readonly name: string;
     readonly formatter;
     readonly computer: Computer;
     readonly deriver: Deriver;
-    readonly texConvertor: TexConvertor;
+    readonly tex: string;
 
-    constructor(argument: Node, name: string, formatter: Formatter, computer: Computer, deriver: Deriver, texConvertor: TexConvertor) {
+    constructor(argument: Node, name: string, formatter: Formatter, computer: Computer, deriver: Deriver, tex: string) {
         this.argument = argument;
         this.name = name;
         this.formatter = formatter;
         this.computer = computer;
         this.deriver = deriver;
-        this.texConvertor = texConvertor;
+        this.tex = tex;
     }
 
     hasVariable(variable: string): boolean {
@@ -41,7 +39,7 @@ class ParentNode implements Node {
     }
 
     toTex(): string {
-        return this.texConvertor(this.argument.toTex());
+        return this.tex + (this.argument.type === NodeType.BINARY_OPERATOR ? putInTexBrackets(this.argument.toTex()) : this.argument.toTex());
     }
 
     tree(indent: string = ''): string {
@@ -54,4 +52,4 @@ class ParentNode implements Node {
 
 }
 
-export const Function = (name: string, formatter: Formatter, computer: Computer, deriver: Deriver, texConvertor: TexConvertor) => (argument: Node) => new ParentNode(argument, name, formatter, computer, deriver, texConvertor);
+export const Function = (name: string, formatter: Formatter, computer: Computer, deriver: Deriver, tex: string) => (argument: Node) => new ParentNode(argument, name, formatter, computer, deriver, tex);

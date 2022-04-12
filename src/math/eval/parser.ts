@@ -1,4 +1,4 @@
-import {getBracketCode, Tokens, TokenType} from "./tokens";
+import {getBracketCode, Token, Tokens, TokenType} from "./tokens";
 import {
     ArcCoSin,
     ArcCoTan,
@@ -13,6 +13,7 @@ import {
     Ln,
     Log,
     Minus,
+    Negate,
     Node,
     Number,
     Pi,
@@ -24,8 +25,26 @@ import {
     Tan,
     Tanh,
     Times,
-    Variable, Zero
+    Variable
 } from "../node";
+import {BinaryConstructor} from "../node/binary";
+
+type AssociativeParams = [TokenType, BinaryConstructor, boolean][];
+
+const expressions: AssociativeParams = [
+    [TokenType.PLUS, Plus, true],
+    [TokenType.MINUS, Minus, true]
+];
+
+const terms: AssociativeParams = [
+    [TokenType.TIMES, Times, true],
+    [TokenType.NUMBER, Times, false],
+    [TokenType.TEXT, Times, false],
+    [TokenType.OPEN_BRACKET, Times, false],
+    [TokenType.OBELUS, Divide, true]
+];
+
+const powers: AssociativeParams = [[TokenType.POWER, Power, true]];
 
 export class Parser {
 
@@ -48,102 +67,77 @@ export class Parser {
         return result;
     }
 
-    expression(): Node {
-        const left = this.minus();
-        if (this.tokens.peek().type === TokenType.PLUS) {
-            this.tokens.next();
-            return Plus(left, this.expression());
+    associative(cases: AssociativeParams, next: () => Node): Node {
+        let left = next();
+        while (true) {
+            let creator = cases.find((creator) => creator[0] === this.tokens.peek().type);
+            if (creator === undefined) {
+                return left;
+            }
+            if (creator[2]) {
+                this.tokens.next();
+            }
+            left = creator[1].bind(this)(left, next());
         }
-
-        return left;
     }
 
-    minus(): Node {
-        if (this.tokens.peek().type === TokenType.MINUS) {
-            this.tokens.next();
-            return Minus(Zero, this.minus());
-        }
+    expression() {
+        return this.associative(expressions, () => this.term());
+    }
 
-        const left = this.factor();
-        if (this.tokens.peek().type === TokenType.MINUS) {
-            this.tokens.next();
-            return Minus(left, this.minus());
-        }
+    term() {
+        return this.associative(terms, () => this.power());
+    }
 
-        return left;
+    power() {
+        return this.associative(powers, () => this.factor());
     }
 
     factor(): Node {
-        let left = this.power();
-        let type = this.tokens.peek().type;
-        switch (type) {
-            case TokenType.TIMES:
-            case TokenType.OBELUS:
-            case TokenType.NUMBER:
+        switch (this.tokens.peek().type) {
             case TokenType.TEXT:
+                return this.parseText(this.tokens.next());
+            case TokenType.MINUS:
+                this.tokens.next();
+                return Negate(this.factor());
             case TokenType.OPEN_BRACKET:
-                if (type === TokenType.OBELUS || type === TokenType.TIMES) {
-                    this.tokens.next();
+                let openingBracket = this.tokens.peek();
+                this.tokens.next();
+                let inside = this.expression();
+                this.expect(TokenType.CLOSE_BRACKET);
+                let closingBracket = this.tokens.next();
+                if (getBracketCode(openingBracket.payload) !== getBracketCode(closingBracket.payload)) {
+                    throw new SyntaxError(`Opened bracket "${openingBracket.payload}" has to be closed by the matching bracket. "${closingBracket.payload}" used at position ${closingBracket.position}.`);
                 }
-                let right = this.factor();
-                if (type === TokenType.OBELUS) {
-                    return Divide(left, right);
-                }
-                return Times(left, right);
+                return inside;
+            default:
+                this.expect(TokenType.NUMBER);
+                return Number(this.tokens.next().payload);
         }
-        return left;
     }
 
-    power(): Node {
-        let left = this.brackets();
-        if (this.tokens.peek().type === TokenType.POWER) {
-            this.tokens.next();
-            let right = this.power();
-            return Power(left, right);
-        }
-        return left;
-    }
+    parseText(text: Token<string>): Node {
+        const value = text.payload;
+        const lastChar = value.substring(text.payload.length - 1);
+        const apartFromLast = value.substring(0, value.length - 1);
 
-    brackets(): Node {
-        let openingBracket = this.tokens.peek();
-        if (openingBracket.type === TokenType.OPEN_BRACKET) {
-            this.tokens.next();
-            let inside = this.expression();
-            this.expect(TokenType.CLOSE_BRACKET);
-            let closingBracket = this.tokens.next();
-            if (getBracketCode(openingBracket.payload) !== getBracketCode(closingBracket.payload)) {
-                throw new SyntaxError(`Opened bracket "${openingBracket.payload}" has to be closed by the matching bracket. "${closingBracket.payload}" used at position ${closingBracket.position}.`);
-            }
-            return inside;
+        let constant = this.knownConstants(value);
+        if (constant !== null) {
+            return constant;
         }
-        return this.text();
-    }
-
-    text(): Node {
-        let text = this.tokens.peek();
-        if (text.type === TokenType.TEXT) {
-            let value = `${text.payload}`;
-            this.tokens.next();
-            let constant = this.knownConstants(value);
+        let function1 = this.knownFunctions(value);
+        if (function1 !== null) {
+            return function1(this.factor());
+        }
+        let function2 = this.knownFunctions(apartFromLast);
+        if (function2 !== null) {
+            let constant = this.knownConstants(lastChar);
             if (constant !== null) {
-                return constant;
+                return function2(constant);
             }
-            let function1 = this.knownFunctions(value);
-            if (function1 !== null) {
-                return function1(this.brackets());
-            }
-            let function2 = this.knownFunctions(value.substring(0, value.length - 1));
-            if (function2 !== null) {
-                let remaining = value.substring(value.length - 1);
-                let constant = this.knownConstants(remaining);
-                if (constant !== null) {
-                    return function2(constant);
-                }
-                return function2(Variable(remaining));
-            }
-            return Variable(value);
+            return function2(Variable(lastChar));
         }
-        return this.number();
+        return Variable(value);
     }
 
     knownConstants(name: string) {
@@ -211,11 +205,6 @@ export class Parser {
             default:
                 return null;
         }
-    }
-
-    number(): Node {
-        this.expect(TokenType.NUMBER);
-        return Number(this.tokens.next().payload);
     }
 
 }

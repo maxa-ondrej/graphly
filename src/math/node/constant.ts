@@ -1,5 +1,4 @@
-import {Node, Variables, Zero} from "./index";
-import {uniqueJoin} from "../../utils/arrays";
+import {Node, NodeType, Variables, Zero} from "./index";
 
 class ParentNode implements Node {
 
@@ -11,7 +10,7 @@ class ParentNode implements Node {
     hasVariable = () => false;
     getVariables = () => [];
 
-    type = 'constant';
+    type = NodeType.CONSTANT;
 
     constructor(functionName: string, tex: string, approximation: number) {
         this.functionName = functionName;

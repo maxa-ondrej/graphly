@@ -5,16 +5,18 @@ import {Button, Col, Form, InputGroup, Row} from "react-bootstrap";
 import LinearInput from "./LinearInput";
 import {deselect, isSelected, remove as removeInput, selectDatum} from "./database";
 import ReactSwitch from "react-switch";
-import Popover from "../components/Popover";
 import MathJax from "../components/MathJax";
+import ImplicitInput from "./ImplicitInput";
+import './Input.css';
 
-export function parseInput(type: string, id: number, setError: (message: string) => void) {
+export function parseInput(type: string, id: number) {
     switch (type) {
         case "linear":
-            return <LinearInput id={id} errorHandler={setError} />;
+            return <LinearInput id={id} />;
         case 'parametric':
-        case 'implicit':
             return <p>ToBeDone</p>;
+        case 'implicit':
+            return <ImplicitInput id={id} />;
         default:
             return <p>Error</p>;
     }
@@ -46,8 +48,6 @@ export default function Input({ id }: { id: number }) {
     const [to, setTo] = useState<undefined|string>(undefined);
     const [graphType, setGraphType] = useState<'polyline' | 'interval' | 'scatter'>('polyline');
     const [visible, setVisible] = useState(true);
-    const [error, setError] = useState('');
-    const inputRef = useRef(null);
     const dispatch = useDispatch();
     const data = useSelector(selectDatum(id));
     const selected = useSelector(isSelected(id));
@@ -88,7 +88,7 @@ export default function Input({ id }: { id: number }) {
     }, [dispatch, id]);
 
     if (!selected && data !== null) {
-        return <div className={visible ? 'text-dark' : 'text-muted'}><MathJax  tex={data.fancy} /></div>;
+        return <div className={(visible ? 'text-dark' : 'text-muted') + ' tex-input'}><MathJax tex={data.fancy} /></div>;
     }
 
     return (
@@ -97,10 +97,9 @@ export default function Input({ id }: { id: number }) {
             event.preventDefault();
         }}>
             <Row className='mt-2 mb-2'>
-                <Col ref={inputRef}>
-                    {parseInput(inputType, id, setError)}
+                <Col>
+                    {parseInput(inputType, id)}
                 </Col>
-                <Popover message={error} placement='bottom' target={inputRef.current} show={error !== ''} />
             </Row>
             <Row className='mb-2'>
                 <Col>

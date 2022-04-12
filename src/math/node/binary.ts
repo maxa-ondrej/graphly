@@ -1,4 +1,4 @@
-import {INDENT, Node, Variables} from "./index";
+import {INDENT, Node, NodeType, putInTexBrackets, Variables} from "./index";
 import {uniqueJoin} from "../../utils/arrays";
 
 type Computer = (left: number, right: number) => number;
@@ -7,7 +7,7 @@ type TexConvertor = (left: string, right: string) => string;
 
 class ParentNode implements Node {
 
-    type = 'binary-operator';
+    type = NodeType.BINARY_OPERATOR;
 
     readonly left: Node;
     readonly right: Node;
@@ -40,7 +40,35 @@ class ParentNode implements Node {
     }
 
     toTex(): string {
-        return this.texConvertor(this.left.toTex(), this.right.toTex());
+        const left = this.left.toTex();
+        const leftInBrackets = putInTexBrackets(left);
+        const leftIsBinary = this.left.type === NodeType.BINARY_OPERATOR;
+        const leftIsPlusOrMinus = this.left instanceof ParentNode && ['+', '-'].includes(this.left.operator);
+        const right = this.right.toTex();
+        const rightInBrackets = putInTexBrackets(right);
+        const rightIsBinary = this.right.type === NodeType.BINARY_OPERATOR;
+        const rightIsPlusOrMinus = this.right instanceof ParentNode && ['+', '-'].includes(this.right.operator);
+        if ((!leftIsBinary && !rightIsBinary && this.left.type !== NodeType.FUNCTION) || this.operator === '+') {
+            return this.texConvertor(left, right);
+        }
+
+        if (this.operator === '-') {
+            if (rightIsBinary && rightIsPlusOrMinus) {
+                return this.texConvertor(left, rightInBrackets);
+            }
+
+            return this.texConvertor(left, right);
+        }
+
+        if (this.operator === '*') {
+            return this.texConvertor(leftIsPlusOrMinus || this.left.type === NodeType.FUNCTION ? leftInBrackets : left, rightIsPlusOrMinus ? rightInBrackets : right);
+        }
+
+        if (this.operator === '^') {
+            return this.texConvertor(this.left instanceof ParentNode && this.left.operator === '^' ? leftInBrackets : left, rightIsPlusOrMinus ? rightInBrackets : right);
+        }
+
+        return this.texConvertor(left, right);
     }
 
     tree(indent: string = ''): string {
@@ -53,4 +81,6 @@ class ParentNode implements Node {
 
 }
 
-export const Binary = (operator: string, name: string, computer: Computer, deriver: Deriver, texConvertor: TexConvertor) => (left: Node, right: Node) => new ParentNode(left, right, operator, name, computer, deriver, texConvertor);
+export type BinaryConstructor = (left: Node, right: Node) => Node;
+
+export const Binary = (operator: string, name: string, computer: Computer, deriver: Deriver, texConvertor: TexConvertor): BinaryConstructor => (left: Node, right: Node) => new ParentNode(left, right, operator, name, computer, deriver, texConvertor);
