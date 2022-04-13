@@ -107,9 +107,6 @@ export default function Input({ id }: { id: number }) {
         <Form onSubmit={event => {
             handleSubmit(true);
             event.preventDefault();
-        }} onBlur={event => {
-            handleSubmit(true);
-            event.preventDefault();
         }}>
             <Row className='mt-2 mb-2'>
                 <Col ref={inputRef}>
