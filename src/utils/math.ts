@@ -20,6 +20,9 @@ export const weightedAverage = (values: [number, number][], requiredWeight: numb
         weight += currentWeight;
     });
     if (weight === 0) {
+        if (requiredWeight === 1) {
+            return 0;
+        }
         return weightedAverage(values, requiredWeight - 1);
     }
     return sum / weight;

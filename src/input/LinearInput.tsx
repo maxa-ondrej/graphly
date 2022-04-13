@@ -3,7 +3,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {modify, selectDatum} from "./database";
 import {Node} from "../math/node";
 import FunctionInput from "./FunctionInput";
-import {weightedMinAndMax} from "../utils/nodes";
+import {deriveSmart, weightedMinAndMax} from "../utils/nodes";
 import {FunctionPlotDatum} from "function-plot/dist/types";
 
 /**
@@ -40,5 +40,5 @@ export default function LinearInput({ id, save }: {id: number, save: (datum: Fun
         save(datum);
     }
 
-    return <FunctionInput valueSelector={() => value} title='f(x) = ' placeholder='Předpis funkce' saveValue={saveInput}  allowedVars={1} />;
+    return <FunctionInput valueSelector={() => value} title='f(x) = ' placeholder='Předpis funkce' saveValue={saveInput}  allowedVars={1} derivator={deriveSmart} />;
 }

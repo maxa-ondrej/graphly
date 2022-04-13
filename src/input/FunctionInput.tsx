@@ -1,4 +1,4 @@
-import React, {useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Col, Form, InputGroup, Row} from "react-bootstrap";
 import parseIt from "../math/eval/parser";
 import lexIt from "../math/eval/lexer";
@@ -36,7 +36,7 @@ export default function FunctionInput({valueSelector, saveValue, title, placehol
     const [node, setNode] = useState<Node|undefined>(undefined);
     const [timeout, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
-    const updateData = (value: string) => {
+    const updateData = () => {
         setError('');
         if (timeout !== null) {
             clearTimeout(timeout);
@@ -59,6 +59,9 @@ export default function FunctionInput({valueSelector, saveValue, title, placehol
         }
     }
 
+    // eslint-disable-next-line
+    useEffect(updateData, [value]);
+
     function addDerivations() {
         if (derivator === undefined) {
             return <></>;
@@ -75,12 +78,7 @@ export default function FunctionInput({valueSelector, saveValue, title, placehol
                         <Form.Control
                             type="text"
                             value={value}
-                            onChange={event => {
-                                const input = event.target.value;
-                                console.log(input);
-                                setValue(input);
-                                updateData(input);
-                            }}
+                            onChange={event => setValue(event.target.value)}
                             placeholder={placeholder}
                             isInvalid={error !== ''}
                         />
