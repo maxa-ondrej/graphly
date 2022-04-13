@@ -3,10 +3,19 @@
 ## Obsah
 
 1. [Úvod](#vod)
-2. [Instalace](#instalace)
-3. [Built With](#built-with)
-4. [Authors](#authors)
-5. [License](#license)
+2. [Instalace programu](#instalace-programu)
+3. [Ovládání programu](#ovldn-programu)
+   1. [Přidání první funkce](#pidn-prvn-funkce)
+   2. [Přidání další funkce](#pidn-dal-funkce)
+   3. [Odebrání funkce](#odebrn-funkce)
+   4. [Stacionární a inflexní body](#stacionrn-a-inflexn-body)
+   5. [Další funkce](#dal-funkce)
+   6. [Seznam povolených operací](#seznam-povolench-operac)
+4. [Vývojářská dokumentace](#vvojsk-dokumentace)
+    1. [Instalace](#instalace)
+    2. [Spuštění](#sputn)
+    3. [Vývoj](#vvoj)
+    4. [Zdroje a použitý software](#zdroje-a-pouit-software)
 
 ## Úvod
 
@@ -17,7 +26,7 @@ pouze `sinx`) a zderivování předpisu.
 
 ![alt](images/main.png)
 
-## Instalace
+## Instalace programu
 
 Ukázková instalace je spuštěná na adrese: [https://maturita-teal.vercel.app/](https://maturita-teal.vercel.app/). \
 Aplikace je také možné si stáhnou a naistalovat přímo do vašeho počítače. Zvolte poslední vydání aplikace

@@ -190,7 +190,7 @@ export const Power = Binary('^', 'POWER', (a, b) => a ** b, (a, b, variable) => 
         }
         return Times(Times(Power(a, b), Ln(a)), derB);
     }
-    return Power(Euler, Times(b, Ln(a))).derive(variable);
+    return derive(Power(Euler, Times(b, Ln(a))), variable);
 }, (left, right) => `${left}^{${right}}`);
 
 export const Euler = Constant('exp(1)', 'e', Math.E);

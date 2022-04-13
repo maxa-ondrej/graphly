@@ -3,7 +3,6 @@ import {useDispatch, useSelector} from "react-redux";
 import {modify, selectDatum} from "./database";
 import {Node} from "../math/node";
 import FunctionInput from "./FunctionInput";
-import {deriveImplicit} from "../utils/nodes";
 import {FunctionPlotDatum} from "function-plot/dist/types";
 
 /**
@@ -13,7 +12,7 @@ import {FunctionPlotDatum} from "function-plot/dist/types";
  * @param save saves the input and updates plot
  * @constructor
  */
-export default function ImplicitInput({ id, save }: {id: number, save: (datum: FunctionPlotDatum) => void}) {
+export default function ImplicitInput({id, save}: { id: number, save: (datum: FunctionPlotDatum) => void }) {
     const dispatch = useDispatch();
     const value = useSelector(selectDatum(id))?.raw[0] ?? '';
 
@@ -29,8 +28,7 @@ export default function ImplicitInput({ id, save }: {id: number, save: (datum: F
             id,
             datum: {
                 datum,
-                min: [0, 0],
-                max: [0, 0],
+                importantYs: [0, 0, 0],
                 raw: [raw],
                 fancy: `${node.toTex()} = 0`
             }
@@ -38,5 +36,6 @@ export default function ImplicitInput({ id, save }: {id: number, save: (datum: F
         save(datum);
     }
 
-    return <FunctionInput valueSelector={() => value} title='f(x, y) = ' placeholder='Předpis funkce' saveValue={updateData} derivator={deriveImplicit}  allowedVars={2}/>;
+    return <FunctionInput valueSelector={() => value} title='f(x, y) = ' placeholder='Předpis funkce'
+                          saveValue={updateData} allowedVars={2}/>;
 }

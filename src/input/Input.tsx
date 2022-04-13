@@ -71,8 +71,7 @@ export default function Input({ id }: { id: number }) {
 
         dispatch(modifyPlot({
             id,
-            min: data.min,
-            max: data.max,
+            importantYs: data.importantYs,
             datum: visible ? {
                 ...(datum === undefined ? data.datum : datum),
                 color,

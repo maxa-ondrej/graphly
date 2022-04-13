@@ -1,7 +1,6 @@
 import {createSlice, Draft, PayloadAction, SliceCaseReducers} from '@reduxjs/toolkit'
 import {StateType} from "../store";
 import {FunctionPlotDatum} from "function-plot/dist/types";
-import {WeightedValue} from "../math/plot/database";
 
 /**
  * State of the input store.
@@ -27,8 +26,7 @@ export interface Data {
     datum: FunctionPlotDatum,
     raw: string[],
     fancy: string,
-    min: WeightedValue,
-    max: WeightedValue
+    importantYs: [number, number, number]
 }
 
 /**
