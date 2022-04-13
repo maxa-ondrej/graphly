@@ -3,7 +3,7 @@ import lexIt from "../math/eval/lexer";
 import {simplify as mathSimplify} from "mathjs";
 import {Divide, Negate, Node, Zero} from "../math/node";
 import {xMax, xMin} from "../math/plot/Plot";
-import {WeightedValue} from "../math/plot/database";
+import {commonQuantiles} from "./math";
 
 /**
  * Simplifies a node
@@ -66,40 +66,29 @@ export const putInTexBrackets = (text: string) => `\\left(${text}\\right)`;
  *
  * @param node
  */
-export const calcValues = (node: Node): WeightedValue[] => {
-    const values: [number, number][] = [];
+export const calcValues = (node: Node): number[] => {
+    const values: number[] = [];
     const variable = node.getVariables()[0];
     for (let x = xMin; x <= xMax; x += 0.01) {
-        values.push([x, node.compute(new Map<string, number>([[variable, x]]))]);
+        values.push(node.compute(new Map<string, number>([[variable, x]])));
     }
     return values;
 };
 
 /**
- * Finds the min and max interesting values in a smart way.
+ * Calculates the first quantile, median and third quantile.
  *
  * @param node
  */
-export const weightedMinAndMax = (node: Node): [WeightedValue, WeightedValue] => {
+export const importantValues = (node: Node): [number, number, number] => {
     const values = calcValues(node);
-    const yValues = new Map<number, number>();
-    values
-        .map(([, y]) => Number(y.toFixed(2)))
-        .forEach((y) => yValues.set(y, (yValues.get(y) ?? 0) + 1));
-    let max = 0;
-    let maxWeighted: WeightedValue = [0, 1];
-    let min = 0;
-    let minWeighted: WeightedValue = [0, 1];
-    yValues.forEach((amount, y) => {
-        const value = y * amount;
-        if (value > max) {
-            max = value;
-            maxWeighted = [y, amount];
-        }
-        if (value < min) {
-            min = value;
-            minWeighted = [y, amount];
-        }
-    });
-    return [minWeighted, maxWeighted];
+    if (node.format(null).search(/(sin|cos)/g) !== -1) {
+        const min = parseFloat(Math.min(...values).toFixed(4));
+        const max = parseFloat(Math.max(...values).toFixed(4));
+        console.log(min, (min + max) / 2, max)
+
+        return [min, (min + max) / 2, max];
+    }
+
+    return commonQuantiles(values);
 };

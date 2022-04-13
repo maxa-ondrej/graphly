@@ -5,6 +5,7 @@ pages:
     - yarn docs
     - rm -rf public
     - mv docs public
+    - mv images public/
   artifacts:
     paths:
       - public

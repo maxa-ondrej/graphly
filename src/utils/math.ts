@@ -1,29 +1,65 @@
 /**
- * Calculates the wighted average. If a weight of a number is smaller when the required, it is skipped.
- * If no values remain after, requiredWeight is decreased by one and process repeats.
+ * Sorts the given array in ascending order.
  *
- * @param values the values to find average of
- * @param requiredWeight the required weight
+ * @param arr
  */
-export const weightedAverage = (values: [number, number][], requiredWeight: number): number => {
-    if (values.length === 0) {
-        return 0;
+export const ascending = (arr: number[]) => arr.sort((a, b) => a - b);
+
+/**
+ * Calculates the sum of all values in array.
+ *
+ * @param arr
+ */
+export const sum = (arr: number[]) => arr.reduce((a, b) => a + b, 0);
+
+/**
+ * Calculates the average value of the array.
+ *
+ * @param arr
+ */
+export const average = (arr: number[]) => sum(arr) / arr.length;
+
+/**
+ * Calculates the quantile of values inside array.
+ *
+ * @param sorted the array (with all its values sorted!)
+ * @param q 0.25 for first quantile, 0.5 for median, 0.75 for third quantile
+ */
+export const quantile = (sorted: number[], q: number) => {
+    const pos = (sorted.length - 1) * q;
+    const base = Math.floor(pos);
+    const rest = pos - base;
+    if (sorted[base + 1] !== undefined) {
+        return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
+    } else {
+        return sorted[base];
     }
-    let sum = 0;
-    let weight = 0;
-    values.forEach((value) => {
-        const currentWeight = value[1];
-        if (currentWeight < requiredWeight) {
-            return;
-        }
-        sum += value[0] * currentWeight;
-        weight += currentWeight;
-    });
-    if (weight === 0) {
-        if (requiredWeight === 1) {
-            return 0;
-        }
-        return weightedAverage(values, requiredWeight - 1);
-    }
-    return sum / weight;
-}
+};
+
+/**
+ * Calculates the first quantile of values inside array.
+ * @param arr
+ */
+export const firstQuantile = (arr: number[]) => quantile(arr, .25);
+
+/**
+ * Calculates the median of values inside array.
+ * @param arr
+ */
+export const median = (arr: number[]) => quantile(arr, .5);
+
+/**
+ * Calculates the third quantile of values inside array.
+ * @param arr
+ */
+export const thirdQuantile = (arr: number[]) => quantile(arr, .75);
+
+/**
+ * Calculates the first quantile, median and third quantile.
+ *
+ * @param arr
+ */
+export const commonQuantiles = (arr: number[]): [number, number, number] => {
+    const sorted = ascending(arr);
+    return [firstQuantile(sorted), median(sorted), thirdQuantile(sorted)];
+};

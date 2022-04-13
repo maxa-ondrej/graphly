@@ -1,7 +1,7 @@
 {
   "package": {
     "productName": "Graphly",
-    "version": "0.1.0"
+    "version": "1.1.0"
   },
   "build": {
     "distDir": "../build",
@@ -13,12 +13,10 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.tauri.dev",
+      "identifier": "cz.majksa",
       "icon": [
-        "icons/32x32.png",
         "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
+        "icons/icon.png",
         "icons/icon.ico"
       ],
       "resources": [],
@@ -29,7 +27,10 @@
       "longDescription": "",
       "deb": {
         "depends": [],
-        "useBootstrapper": false
+        "useBootstrapper": false,
+        "files": {
+          "/usr/lib/README.md": "../README.md"
+        }
       },
       "macOS": {
         "frameworks": [],

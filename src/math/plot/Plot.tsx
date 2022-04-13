@@ -36,7 +36,7 @@ export default function Plot({width, height}: { width: number, height: number })
                 },
                 yAxis: {
                     label: 'osa y',
-                    domain: yDomain
+                    domain: data.length === 1 && data[0].fnType === 'linear' ? yDomain : [xMin, xMax]
                 },
                 width,
                 height
