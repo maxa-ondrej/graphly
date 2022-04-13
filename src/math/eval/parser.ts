@@ -31,11 +31,17 @@ import {BinaryConstructor} from "../node/binary";
 
 type AssociativeParams = [TokenType, BinaryConstructor, boolean][];
 
+/**
+ * Cases that create expressions.
+ */
 const expressions: AssociativeParams = [
     [TokenType.PLUS, Plus, true],
     [TokenType.MINUS, Minus, true]
 ];
 
+/**
+ * Cases that create terms.
+ */
 const terms: AssociativeParams = [
     [TokenType.TIMES, Times, true],
     [TokenType.NUMBER, Times, false],
@@ -44,8 +50,14 @@ const terms: AssociativeParams = [
     [TokenType.OBELUS, Divide, true]
 ];
 
+/**
+ * Cases that create powers.
+ */
 const powers: AssociativeParams = [[TokenType.POWER, Power, true]];
 
+/**
+ * The parser itself. Takes an array of tokens and converts them into a tree of nodes.
+ */
 export class Parser {
 
     readonly tokens: Tokens;
@@ -54,6 +66,11 @@ export class Parser {
         this.tokens = tokens;
     }
 
+    /**
+     * If expectation is not full-filled, an error is thrown.
+     *
+     * @param expected
+     */
     expect(expected: TokenType) {
         const actual = this.tokens.peek();
         if (actual.type !== expected) {
@@ -61,12 +78,20 @@ export class Parser {
         }
     }
 
+    /**
+     * The main function for parsing.
+     */
     parse(): Node {
         let result = this.expression();
         this.expect(TokenType.EOF);
         return result;
     }
 
+    /**
+     * Function to keep associativeness.
+     * @param cases
+     * @param next
+     */
     associative(cases: AssociativeParams, next: () => Node): Node {
         let left = next();
         while (true) {
@@ -81,18 +106,38 @@ export class Parser {
         }
     }
 
+    /**
+     * E -> T { + T }
+     * E -> T { - T }
+     * E -> T
+     */
     expression() {
         return this.associative(expressions, () => this.term());
     }
 
+    /**
+     * T -> P { * P }
+     * T -> P { / P }
+     * T -> P
+     */
     term() {
         return this.associative(terms, () => this.power());
     }
 
+    /**
+     * P -> F { ^ F }
+     * P -> F
+     */
     power() {
         return this.associative(powers, () => this.factor());
     }
 
+    /**
+     * F -> ID | ID F
+     * F -> -F
+     * F -> (E)
+     * F -> NUM
+     */
     factor(): Node {
         switch (this.tokens.peek().type) {
             case TokenType.TEXT:
@@ -116,6 +161,11 @@ export class Parser {
         }
     }
 
+    /**
+     * Parses text into a node, to allow function declarations like sinx etc.
+     *
+     * @param text
+     */
     parseText(text: Token<string>): Node {
         const value = text.payload;
         const lastChar = value.substring(text.payload.length - 1);
@@ -140,6 +190,11 @@ export class Parser {
         return Variable(value);
     }
 
+    /**
+     * Checks is name is a constant and returns it.
+     *
+     * @param name
+     */
     knownConstants(name: string) {
         switch (name) {
             case 'e':
@@ -154,6 +209,11 @@ export class Parser {
         }
     }
 
+    /**
+     * Checks is name is a function and returns it.
+     *
+     * @param name
+     */
     knownFunctions(name: string) {
         switch (name) {
             case 'sqrt':
@@ -209,6 +269,11 @@ export class Parser {
 
 }
 
+/**
+ * The parsing entrypoint.
+ *
+ * @param input
+ */
 export default function parseIt(input: Tokens): Node {
     return new Parser(input).parse();
 }

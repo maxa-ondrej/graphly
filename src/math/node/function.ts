@@ -7,6 +7,9 @@ type Deriver = (argument: Node, variable: string) => Node;
 
 export const isFunction = (node: Node) => node instanceof FunctionNode && (node.name !== 'NEGATE' || node.argument.type === NodeType.FUNCTION);
 
+/**
+ * A function node with an argument.
+ */
 export class FunctionNode implements Node {
 
     type = NodeType.FUNCTION;
@@ -55,4 +58,14 @@ export class FunctionNode implements Node {
 
 }
 
+/**
+ * The function constructor.
+ *
+ * @param name
+ * @param formatter
+ * @param computer
+ * @param deriver
+ * @param tex
+ * @constructor
+ */
 export const Function = (name: string, formatter: Formatter, computer: Computer, deriver: Deriver, tex: string) => (argument: Node) => new FunctionNode(argument, name, formatter, computer, deriver, tex);

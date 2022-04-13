@@ -11,6 +11,9 @@ function getWindowDimensions() {
     };
 }
 
+/**
+ * React hook that listens for window width and height.
+ */
 export function useWindowDimensions() {
     const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions());
 

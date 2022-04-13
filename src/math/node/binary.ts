@@ -7,6 +7,9 @@ type Computer = (left: number, right: number) => number;
 type Deriver = (left: Node, right: Node, variable: string) => Node;
 type TexConvertor = (left: string, right: string) => string;
 
+/**
+ * Node that joins 2 nodes together using a binary operator.
+ */
 export class BinaryNode implements Node {
 
     type = NodeType.BINARY_OPERATOR;
@@ -83,6 +86,19 @@ export class BinaryNode implements Node {
 
 }
 
+/**
+ * Type of binary constructor.
+ */
 export type BinaryConstructor = (left: Node, right: Node) => Node;
 
+/**
+ * The binary constructor.
+ *
+ * @param operator
+ * @param name
+ * @param computer
+ * @param deriver
+ * @param texConvertor
+ * @constructor
+ */
 export const Binary = (operator: string, name: string, computer: Computer, deriver: Deriver, texConvertor: TexConvertor): BinaryConstructor => (left: Node, right: Node) => new BinaryNode(left, right, operator, name, computer, deriver, texConvertor);

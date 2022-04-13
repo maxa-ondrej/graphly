@@ -1,3 +1,6 @@
+/**
+ * Enum of all possible types of tokens.
+ */
 export enum TokenType {
     NUMBER = "NUMBER",
     TEXT = "TEXT",
@@ -11,6 +14,11 @@ export enum TokenType {
     EOF = "EOF"
 }
 
+/**
+ * Detects type of the given bracket.
+ *
+ * @param bracket
+ */
 export function getBracketCode(bracket: string) {
     switch (bracket) {
         case '(':
@@ -30,12 +38,18 @@ export function getBracketCode(bracket: string) {
     }
 }
 
+/**
+ * Ancestor for all tokens
+ */
 export interface Token<P = null> {
     type: TokenType,
     position: number,
     payload: P,
 }
 
+/**
+ * Queue of tokens.
+ */
 export class Tokens {
     tokens: Token<any>[];
 

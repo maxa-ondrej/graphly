@@ -1,5 +1,8 @@
 import {Node, NodeType, Variables, Zero} from "./index";
 
+/**
+ * A constant value.
+ */
 export class ConstantNode implements Node {
 
     readonly tex: string;
@@ -45,4 +48,12 @@ export class ConstantNode implements Node {
 
 }
 
+/**
+ * The constant constructor.
+ *
+ * @param functionName
+ * @param tex
+ * @param approximation
+ * @constructor
+ */
 export const Constant = (functionName: string, tex: string, approximation: number) => new ConstantNode(functionName, tex, approximation);

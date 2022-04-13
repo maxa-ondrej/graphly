@@ -5,6 +5,9 @@ import {derive} from "../../utils/nodes";
 
 export const INDENT = '  ';
 
+/**
+ * Enum of all node types.
+ */
 export enum NodeType {
     NUMBER = 'number',
     VARIABLE = 'variable',
@@ -13,6 +16,9 @@ export enum NodeType {
     CONSTANT = 'constant',
 }
 
+/**
+ * The ancestor of all nodes.
+ */
 export interface Node {
 
     type: NodeType;
@@ -33,8 +39,17 @@ export interface Node {
 
 }
 
+/**
+ * Type of variables map, that can be used to compute the value of a node.
+ */
 export type Variables = Map<string, number>;
 
+/**
+ * The number node.
+ *
+ * @param value
+ * @constructor
+ */
 export const Number = (value: number): Node => ({
     type: NodeType.NUMBER,
     hasVariable: () => false,
@@ -56,6 +71,12 @@ export const Number = (value: number): Node => ({
     }
 });
 
+/**
+ * The variable node.
+ *
+ * @param name
+ * @constructor
+ */
 export const Variable = (name: string): Node => ({
     type: NodeType.VARIABLE,
     hasVariable: (variable: string) => name === variable,
@@ -84,10 +105,26 @@ const nodesEqual = (a: Node, b: Node) => {
     return a.format(null) === b.format(null);
 }
 
+/**
+ * Number node with value of 0
+ */
 export const Zero = Number(0);
+/**
+ * Number node with value of 1
+ */
 export const One = Number(1);
+/**
+ * Number node with value of -1
+ */
 export const NegativeOne = Number(-1);
 
+/**
+ * Fraction of numbers constructor.
+ *
+ * @param d denominator
+ * @param n numerator
+ * @constructor
+ */
 export const Fraction = (d: number, n: number): Node => Divide(Number(d), Number(n));
 
 export const Plus = Binary('+', 'PLUS', (a, b) => a + b, (a, b, variable) => {

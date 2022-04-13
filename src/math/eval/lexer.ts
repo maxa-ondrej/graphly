@@ -1,36 +1,46 @@
-import {
-    CloseBracket,
-    Eof,
-    Minus,
-    Number,
-    Obelus,
-    OpenBracket,
-    Plus,
-    Power,
-    Text,
-    Times,
-    Token,
-    Tokens
-} from "./tokens";
+import {CloseBracket, Eof, Minus, Number, Obelus, OpenBracket, Plus, Power, Text, Times, Token, Tokens} from "./tokens";
 
+/**
+ * Convert a string (more specifically the first character) to Char Code.
+ *
+ * @param char
+ */
 export const toChar = (char: any): number => `${char}`.charCodeAt(0);
 
+/**
+ * Thrown when an error occurs while lexing.
+ */
 export class LexingError extends Error {
     constructor(input: string, position: number) {
         super(`Unexpected input "${input}" at position ${position}`);
     }
 }
 
-class Lexer {
+/**
+ * The almighty lexer itself. Turns a string into an array of tokens.
+ */
+export class Lexer {
 
+    /**
+     * The index of currently viewed character.
+     */
     pointer: number = 0;
+    /**
+     * The whole input string.
+     */
     input: string;
+    /**
+     * Result array of tokens.
+     */
     tokens = new Array<Token<any>>();
 
     constructor(input: string) {
         this.input = input + ' ';
     }
 
+    /**
+     * The main function for lexing.
+     */
     lexIt() {
         while (this.pointer < this.input.length) {
             if (this.isNumber) {
@@ -54,15 +64,24 @@ class Lexer {
         this.tokens.push(Eof(this.pointer))
     }
 
+    /**
+     * Gets the current character (as a string)
+     */
     get char(): string {
         return this.input.charAt(this.pointer);
     }
 
+    /**
+     * Checks if the current character is a number (using char codes).
+     */
     get isNumber(): boolean {
         const c = this.input.charCodeAt(this.pointer);
         return c >= toChar(0) && c <= toChar(9);
     }
 
+    /**
+     * Load following characters into a Number Token.
+     */
     get number(): Token<number> {
         let isDecimal = false;
         let number = '';
@@ -79,14 +98,20 @@ class Lexer {
             }
             this.pointer++;
         }
-        return Number(this.pointer - number.length,number.includes('.') ? parseFloat(number) : parseInt(number));
+        return Number(this.pointer - number.length, number.includes('.') ? parseFloat(number) : parseInt(number));
     }
 
+    /**
+     * Checks if the current character is a text [a-zA-Z] (using char codes).
+     */
     get isText(): boolean {
         const c = this.input.charCodeAt(this.pointer);
         return (c >= toChar('a') && c <= toChar('z')) || (c >= toChar('A') && c <= toChar('Z'));
     }
 
+    /**
+     * Load following characters into a Text Token.
+     */
     get text(): Token<string> {
         let text = '';
         while (this.pointer < this.input.length) {
@@ -98,10 +123,13 @@ class Lexer {
             }
             break;
         }
-        return Text(this.pointer - text.length,text);
+        return Text(this.pointer - text.length, text);
     }
 
-    peekSingleToken(): Token<any>|null {
+    /**
+     * Handle all single tokens.
+     */
+    peekSingleToken(): Token<any> | null {
         switch (this.char) {
             case '+':
                 return Plus(this.pointer);
@@ -129,6 +157,11 @@ class Lexer {
 
     }
 
+    /**
+     * Check and throw an error.
+     *
+     * @param condition if true, an error is thrown
+     */
     errorIf(condition: boolean) {
         if (condition) {
             throw new LexingError(this.input.charAt(this.pointer), this.pointer);
@@ -136,6 +169,11 @@ class Lexer {
     }
 }
 
+/**
+ * Turns provided string into an array of tokens.
+ *
+ * @param input the input string
+ */
 export default function lexIt(input: string): Tokens {
     const lexer = new Lexer(input);
     lexer.lexIt();

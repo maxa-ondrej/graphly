@@ -3,7 +3,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {modify, selectDatum} from "./database";
 import {Node} from "../math/node";
 import FunctionInput from "./FunctionInput";
-import {wightedMinAndMax} from "../utils/nodes";
+import {weightedMinAndMax} from "../utils/nodes";
 import {FunctionPlotDatum} from "function-plot/dist/types";
 
 /**
@@ -22,7 +22,7 @@ export default function LinearInput({ id, save }: {id: number, save: (datum: Fun
         if (node === undefined) {
             return;
         }
-        const minAndMax = wightedMinAndMax(node);
+        const minAndMax = weightedMinAndMax(node);
         const datum: FunctionPlotDatum = {
             fn: node.format('x'),
             fnType: "linear",
