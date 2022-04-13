@@ -67,11 +67,12 @@ export const selectMinAndMax = (state: Draft<StateType>): [number, number] => {
         return [-10, 10];
     }
 
-    console.log(state.plot.recipes.map((recipe) => recipe.min), weightedAverage(state.plot.recipes.map((recipe) => recipe.min), 2) * 1.3);
+    const min = weightedAverage(state.plot.recipes.map((recipe) => recipe.min), 2);
+    const max = weightedAverage(state.plot.recipes.map((recipe) => recipe.max), 2);
 
     return [
-        weightedAverage(state.plot.recipes.map((recipe) => recipe.min), 2) * 1.3,
-        weightedAverage(state.plot.recipes.map((recipe) => recipe.max), 2) * 1.3,
+        min === 0 ? max * (-0.3) : min * 1.3,
+        max === 0 ? min * (-0.3) : max * 1.3,
     ];
 }
 
@@ -89,4 +90,7 @@ export const modify = (recipe: RecipeWithId): PayloadAction<RecipeWithId> => plo
  */
 export const remove = (id: number): PayloadAction<number> => plotsSlice.actions.remove(id);
 
+/**
+ * The generated reducer for plots database.
+ */
 export default plotsSlice.reducer
