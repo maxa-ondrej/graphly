@@ -1,22 +1,28 @@
 import React, {useEffect, useRef} from 'react'
 import functionPlot from 'function-plot'
-import {useSelector} from "react-redux";
-import {selectAllData, selectMinAndMax} from "./database";
+import {FunctionPlotDatum} from "function-plot/dist/types";
 
 export const xMin = -10;
 export const xMax = 10;
+
+type Props = {
+    width: number,
+    height: number,
+    data: FunctionPlotDatum[],
+    yDomain: [number, number] | undefined,
+};
 
 /**
  * The heart of the application. This components selects data from databases and plots it.
  *
  * @param width width of the plot
  * @param height height of the plot
+ * @param data the plot data
+ * @param yDomain initial ends of y axis
  * @constructor
  */
-export default function Plot({width, height}: { width: number, height: number }) {
+export default function Plot({width, height, data, yDomain}: Props) {
     const rootEl = useRef(null);
-    const data = useSelector(selectAllData);
-    const yDomain = useSelector(selectMinAndMax);
 
     useEffect(() => {
         try {
