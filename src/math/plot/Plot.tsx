@@ -10,6 +10,7 @@ type Props = {
     height: number,
     data: FunctionPlotDatum[],
     yDomain: [number, number] | undefined,
+    showLabels: boolean,
 };
 
 /**
@@ -19,9 +20,10 @@ type Props = {
  * @param height height of the plot
  * @param data the plot data
  * @param yDomain initial ends of y axis
+ * @param showLabels if the displayed graph should show labels
  * @constructor
  */
-export default function Plot({width, height, data, yDomain}: Props) {
+export default function Plot({width, height, data, yDomain, showLabels}: Props) {
     const rootEl = useRef(null);
 
     useEffect(() => {
@@ -34,14 +36,14 @@ export default function Plot({width, height, data, yDomain}: Props) {
                 data: [
                     ...data,
                 ],
-                title: 'Graphly',
+                title: showLabels ? 'Graphly' : '',
                 grid: true,
                 xAxis: {
-                    label: 'osa x',
+                    label: showLabels ? 'osa x' : '',
                     domain: [xMin, xMax]
                 },
                 yAxis: {
-                    label: 'osa y',
+                    label: showLabels ? 'osa y' : '',
                     domain: data.length === 1 && data[0].fnType === 'linear' ? yDomain : [xMin, xMax]
                 },
                 width,
@@ -52,5 +54,5 @@ export default function Plot({width, height, data, yDomain}: Props) {
         }
     }, [data, width, height, yDomain])
 
-    return (<div className='mt-2' ref={rootEl}/>);
+    return (<div className={showLabels ? 'mt-2' : ''} ref={rootEl}/>);
 }

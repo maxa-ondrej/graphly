@@ -77,11 +77,12 @@ export default function App() {
     if (searchParams.has('data')) {
         const inputs = searchParams.get('data');
         try {
+            console.log(inputs as string);
             let json = JSON.parse(inputs as string);
             if (!Array.isArray(json)) {
                 json = [json];
             }
-            return <Plot width={width * .9} height={height * .9} data={parseInputs(json)}  yDomain={undefined}/>;
+            return <Plot width={width} height={height} data={parseInputs(json)}  yDomain={undefined} showLabels={false}/>;
         } catch (e: any) {
             return <p>{e.message}</p>;
         }
@@ -100,6 +101,7 @@ export default function App() {
                           height={phone ? Math.min(width * 3 / 4, height * 0.6) : Math.min(width * 3 / 8, height)}
                           data={data}
                           yDomain={yDomain}
+                          showLabels={true}
                     />
                 </Col>
             </Row>

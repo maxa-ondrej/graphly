@@ -10,6 +10,7 @@ import ImplicitInput from "./ImplicitInput";
 import './Input.css';
 import Popover from "../components/Popover";
 import {FunctionPlotDatum} from "function-plot/dist/types";
+import {FaSave, FaTrash} from "react-icons/fa";
 
 /**
  * Returns corresponding input element depending on the type.
@@ -150,17 +151,15 @@ export default function Input({ id }: { id: number }) {
                     <Form.Control className='w-100' type="color" value={color} onChange={event => setColor(event.target.value)} title='Barva grafu' />
                 </Col>
                 <Col xs={3}>
-                    <div className='mt-1' title={visible ? 'Skrýt graf' : 'Zobrazit graf'}>
-                        <ReactSwitch checked={visible} onChange={checked => setVisible(checked)} />
+                    <div className='d-flex mt-1' title={visible ? 'Skrýt graf' : 'Zobrazit graf'}>
+                        <ReactSwitch className='ms-auto' checked={visible} onChange={checked => setVisible(checked)} />
                     </div>
                 </Col>
             </Row>
             <Row className='mb-2'>
-                <Col className='ms-auto'>
-                    <Button variant="primary" type="submit">Uložit</Button>
-                </Col>
-                <Col>
-                    <Button variant="danger" onClick={remove}>Smazat</Button>
+                <Col className='d-flex'>
+                    <Button variant="danger" onClick={remove} className='ms-auto'><FaTrash /> Smazat</Button>
+                    <Button variant="primary" type="submit" className='ms-2'><FaSave /> Uložit</Button>
                 </Col>
             </Row>
         </Form>
